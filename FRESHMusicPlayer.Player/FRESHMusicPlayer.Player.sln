@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FRESHMusicPlayer.Core", "FRESHMusicPlayer.Player\FRESHMusicPlayer.Core.csproj", "{FFE8EAFD-7FAA-4503-9364-2643821A2BC8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinformsTest", "WinformsTest\WinformsTest.csproj", "{AA375910-6E80-4570-9663-8EA13238192A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FFE8EAFD-7FAA-4503-9364-2643821A2BC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFE8EAFD-7FAA-4503-9364-2643821A2BC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFE8EAFD-7FAA-4503-9364-2643821A2BC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFE8EAFD-7FAA-4503-9364-2643821A2BC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA375910-6E80-4570-9663-8EA13238192A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA375910-6E80-4570-9663-8EA13238192A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA375910-6E80-4570-9663-8EA13238192A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA375910-6E80-4570-9663-8EA13238192A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4AD6E028-0932-471C-828A-F2CBCA4A7CED}
+	EndGlobalSection
+EndGlobal
