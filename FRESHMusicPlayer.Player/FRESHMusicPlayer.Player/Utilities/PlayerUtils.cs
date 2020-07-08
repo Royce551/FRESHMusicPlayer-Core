@@ -10,28 +10,28 @@ namespace FRESHMusicPlayer.Utilities
     {
         private static Random rng = new Random();
 
-        public static List<string> ShuffleQueue(List<string> list)
+        public static List<string> ShuffleQueue(this Player player, List<string> list)
         {
-            List<string> listtosort = new List<string>();
-            List<string> listtoreinsert = new List<string>();
-            int number = 0;
-            foreach (string x in list)
+            var listtosort = new List<string>();
+            var listtoreinsert = new List<string>();
+            var number = 0;
+            foreach (var x in list)
             {
-                if (Player.QueuePosition < number) listtosort.Add(x);
+                if (player.QueuePosition < number) listtosort.Add(x);
                 else listtoreinsert.Add(x);
                 number++;
             }
             
-            int n = listtosort.Count;
+            var n = listtosort.Count;
             while (n > 1)
             {
                 n--;
-                int k = rng.Next(n + 1);
-                string value = listtosort[k];
+                var k = rng.Next(n + 1);
+                var value = listtosort[k];
                 listtosort[k] = listtosort[n];
                 listtosort[n] = value;
             }
-            foreach (string x in listtosort) listtoreinsert.Add(x);
+            foreach (var x in listtosort) listtoreinsert.Add(x);
             return listtoreinsert;
         }
     }

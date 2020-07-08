@@ -1,26 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using FRESHMusicPlayer;
+using FRESHMusicPlayer.Handlers;
+
 namespace WinformsTest
 {
     public partial class FreshMusicPlayer : Form
     {
+        private Player player = new Player();
+
         public FreshMusicPlayer()
         {
             InitializeComponent();
-            Player.songChanged += Player_songChanged;
-            Player.songStopped += Player_songStopped;
-            Player.songException += Player_songException;
+            player.SongChanged += Player_songChanged;
+            player.SongStopped += Player_songStopped;
+            player.SongException += Player_songException;
         }
 
-        private void Player_songException(object sender, FRESHMusicPlayer.Handlers.PlaybackExceptionEventArgs e)
+        private void Player_songException(object sender, PlaybackExceptionEventArgs e)
         {
             MessageBox.Show("something did a fucky wucky");
         }
@@ -37,25 +34,23 @@ namespace WinformsTest
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (Player.paused) Player.ResumeMusic();
-            else Player.PauseMusic();
+            if (player.Paused) player.ResumeMusic();
+            else player.PauseMusic();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Player.StopMusic();
+            player.StopMusic();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                Player.AddQueue(openFileDialog1.FileName);
-                Player.PlayMusic();
-                Player.currentvolume = 0.2f;
-                Player.UpdateSettings();
-            }
+            var openFileDialog1 = new OpenFileDialog();
+            if (openFileDialog1.ShowDialog() != DialogResult.OK) return;
+            player.AddQueue(openFileDialog1.FileName);
+            player.PlayMusic();
+            player.CurrentVolume = 0.2f;
+            player.UpdateSettings();
         }
     }
 }
