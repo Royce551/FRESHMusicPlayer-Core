@@ -30,8 +30,6 @@ namespace FRESHMusicPlayer
 
         public DateTime LastUpdateCheck { get; set; }
 
-        public string SongPosition => $"{AudioFile.CurrentTime:c} / {AudioFile.TotalTime:c}";
-
 
         /// <summary>
         /// Raised whenever a new track is being played.
@@ -247,6 +245,10 @@ namespace FRESHMusicPlayer
         /// Returns a formatted string of the current playback position.
         /// </summary>
         /// <returns></returns>
+
+        public string SongPositionString() => $"{AudioFile.CurrentTime:c} / {AudioFile.TotalTime:c}";
+
+
         //if (playing) // Only work if music is currently playing
         //if (!positiononly) position += 1; // Only tick up the position if it's being called from UserInterface
 
