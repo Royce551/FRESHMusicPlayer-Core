@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>FRESHMusicPlayerCore</id>
+    <!-- version will be replaced by MSBuild -->
+    <version>0.0.0.0</version>
+    <title>FRESHMusicPlayer-Core</title>
+    <authors>Squid Grill</authors>
+    <description>Music player component for GUI Windows applications</description>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <copyright>2020</copyright>
+    <dependencies />
+  </metadata>
+  <files>
+    <file src="*.*" target="lib\net472\" exclude="*.pdb;*.nupkg;*.vshost.*;database.json"/>
+  </files>
+</package>

@@ -200,8 +200,7 @@ namespace FRESHMusicPlayer
                 //position = 0;
                 SongStopped?.Invoke(null, EventArgs.Empty);
             }
-            catch (NAudio.MmException
-            ) // This is an old workaround from the original FMP days. Shouldn't be needed anymore, but is kept anyway for the sake of
+            catch (NAudio.MmException) // This is an old workaround from the original FMP days. Shouldn't be needed anymore, but is kept anyway for the sake of
             {
                 // stability.
                 Console.WriteLine("Things are breaking!");
