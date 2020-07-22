@@ -24,94 +24,94 @@ namespace FRESHMusicPlayer.Handlers
                 Directory.CreateDirectory(DatabasePath);
                 File.WriteAllText(DatabasePath + "\\database.json", $"{{\"Version\":{DatabaseVersion},\"Songs\":[]}}");
             }
-            using (StreamReader file = File.OpenText(DatabasePath + "\\database.json")) // Read json file
+            using (var file = File.OpenText(DatabasePath + "\\database.json")) // Read json file
             {
-                JsonSerializer serializer = new JsonSerializer();
-                DatabaseFormat database = (DatabaseFormat)serializer.Deserialize(file, typeof(DatabaseFormat));
+                var serializer = new JsonSerializer();
+                var database = (DatabaseFormat)serializer.Deserialize(file, typeof(DatabaseFormat));
                 return database.Songs;
             }
         }
 
         public static void ImportSong(string filepath)
         {
-            List<string> database = ReadSongs();
+            var database = ReadSongs();
 
             database.Add(filepath); // Add the new song in
-            DatabaseFormat format = new DatabaseFormat();
+            var format = new DatabaseFormat();
             format.Version = 1;
             format.Songs = new List<string>();
             format.Songs = database;
 
-            using (StreamWriter file = File.CreateText(DatabasePath + "\\database.json"))
+            using (var file = File.CreateText(DatabasePath + "\\database.json"))
             {
-                JsonSerializer serializer = new JsonSerializer();
+                var serializer = new JsonSerializer();
                 serializer.Serialize(file, format);
             }
 
         }
         public static void ImportSong(string[] filepath)
         {
-            List<string> database = ReadSongs();
+            var database = ReadSongs();
 
             database.AddRange(filepath);
-            DatabaseFormat format = new DatabaseFormat();
+            var format = new DatabaseFormat();
             format.Version = 1;
             format.Songs = new List<string>();
             format.Songs = database;
 
-            using (StreamWriter file = File.CreateText(DatabasePath + "\\database.json"))
+            using (var file = File.CreateText(DatabasePath + "\\database.json"))
             {
-                JsonSerializer serializer = new JsonSerializer();
+                var serializer = new JsonSerializer();
                 serializer.Serialize(file, format);
             }
 
         }
         public static void ImportSong(List<string> filepath)
         {
-            List<string> database = ReadSongs();
+            var database = ReadSongs();
 
             database.AddRange(filepath);
-            DatabaseFormat format = new DatabaseFormat();
+            var format = new DatabaseFormat();
             format.Version = 1;
             format.Songs = new List<string>();
             format.Songs = database;
 
-            using (StreamWriter file = File.CreateText(DatabasePath + "\\database.json"))
+            using (var file = File.CreateText(DatabasePath + "\\database.json"))
             {
-                JsonSerializer serializer = new JsonSerializer();
+                var serializer = new JsonSerializer();
                 serializer.Serialize(file, format);
             }
 
         }
         public static void ImportSong(IList<string> filepath)
         {
-            List<string> database = ReadSongs();
+            var database = ReadSongs();
 
             database.AddRange(filepath);
-            DatabaseFormat format = new DatabaseFormat();
+            var format = new DatabaseFormat();
             format.Version = 1;
             format.Songs = new List<string>();
             format.Songs = database;
 
-            using (StreamWriter file = File.CreateText(DatabasePath + "\\database.json"))
+            using (var file = File.CreateText(DatabasePath + "\\database.json"))
             {
-                JsonSerializer serializer = new JsonSerializer();
+                var serializer = new JsonSerializer();
                 serializer.Serialize(file, format);
             }
 
         }
         public static void DeleteSong(string filepath)
         {
-            List<string> database = ReadSongs();
+            var database = ReadSongs();
             database.Remove(filepath);
-            DatabaseFormat format = new DatabaseFormat();
+            var format = new DatabaseFormat();
             format.Version = 1;
             format.Songs = database;
             
 
-            using (StreamWriter file = File.CreateText(DatabasePath + "\\database.json"))
+            using (var file = File.CreateText(DatabasePath + "\\database.json"))
             {
-                JsonSerializer serializer = new JsonSerializer();
+                var serializer = new JsonSerializer();
                 serializer.Serialize(file, format);
             }
         }
