@@ -247,7 +247,7 @@ namespace FRESHMusicPlayer
         /// </summary>
         /// <returns></returns>
 
-        public string SongPositionString => $"{AudioFile.CurrentTime:c} / {AudioFile.TotalTime:c}";
+        public string SongPositionString() => $"{AudioFile.CurrentTime:c} / {AudioFile.TotalTime:c}";
 
 
         //if (playing) // Only work if music is currently playing
