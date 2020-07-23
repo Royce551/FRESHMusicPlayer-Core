@@ -35,7 +35,6 @@ namespace FRESHMusicPlayer
         /// Raised whenever a new track is being played.
         /// </summary>
         public event EventHandler SongChanged;
-
         public event EventHandler SongStopped;
         public event EventHandler<PlaybackExceptionEventArgs> SongException;
 
@@ -199,8 +198,7 @@ namespace FRESHMusicPlayer
                 SongStopped?.Invoke(null, EventArgs.Empty);
             }
             catch (NAudio.MmException) // This is an old workaround from the original FMP days. Shouldn't be needed anymore, but is kept anyway for the sake of
-            {
-                // stability.
+            {                          // stability.
                 Console.WriteLine("Things are breaking!");
                 Console.WriteLine(FilePath);
                 outputDevice?.Dispose();
@@ -245,43 +243,25 @@ namespace FRESHMusicPlayer
         /// Returns a formatted string of the current playback position.
         /// </summary>
         /// <returns></returns>
-
         public string SongPositionString() => $"{AudioFile.CurrentTime:c} / {AudioFile.TotalTime:c}";
 
-
-        //if (playing) // Only work if music is currently playing
-        //if (!positiononly) position += 1; // Only tick up the position if it's being called from UserInterface
-
-        //ATL.Track theTrack = new ATL.Track(filePath);
 
         #endregion
 
         // Integration
 
         #region DiscordRPC
+        /// <summary>
+        /// Initializes the Discord RPC client. Once it has been initialized, you can set the presence by using <see cref="UpdateRPC(string, string, string)"/>
+        /// </summary>
+        /// <param name="applicationID">The application ID of your app</param>
+        public void InitDiscordRPC(string applicationID)
+        { // FMP application ID - 656678380283887626
+            Client = new DiscordRpcClient(applicationID);
 
-        public void InitDiscordRPC()
-        {
-            /*
-                Create a discord client
-                NOTE: 	If you are using Unity3D, you must use the full constructor and define
-                         the pipe connection.
-                */
-            Client = new DiscordRpcClient("656678380283887626");
-
-            //Set the logger
-            //client.Logger = new ConsoleLogger() { Level = Discord.LogLevel.Warning };
-
-            //Subscribe to events
             Client.OnReady += (sender, e) => { Console.WriteLine("Received Ready from user {0}", e.User.Username); };
-
             Client.OnPresenceUpdate += (sender, e) => { Console.WriteLine("Received Update! {0}", e.Presence); };
-
-            //Connect to the RPC
             Client.Initialize();
-
-            //Set the rich presence
-            //Call this as many times as you want and anywhere in your code.
         }
 
         public void UpdateRPC(string Activity, string Artist = null, string Title = null)
