@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using FRESHMusicPlayer;
 using FRESHMusicPlayer.Handlers;
@@ -8,6 +9,7 @@ namespace WinformsTest
     public partial class FreshMusicPlayer : Form
     {
         private Player player = new Player();
+        private List<string> library = new List<string>();
 
         public FreshMusicPlayer()
         {
@@ -15,6 +17,7 @@ namespace WinformsTest
             player.SongChanged += Player_songChanged;
             player.SongStopped += Player_songStopped;
             player.SongException += Player_songException;
+            library = DatabaseHandler.ReadSongs();
         }
 
         private void Player_songException(object sender, PlaybackExceptionEventArgs e)

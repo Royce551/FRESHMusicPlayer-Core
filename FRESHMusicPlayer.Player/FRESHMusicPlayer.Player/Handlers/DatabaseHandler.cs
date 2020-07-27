@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 namespace FRESHMusicPlayer.Handlers
 {
-    static class DatabaseHandler
+    public static class DatabaseHandler
     {
         public static readonly int DatabaseVersion = 1;
         public static readonly string DatabasePath;
