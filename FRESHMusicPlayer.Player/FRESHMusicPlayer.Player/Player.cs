@@ -11,6 +11,7 @@ namespace FRESHMusicPlayer
     {
 
         private IAudioBackend currentBackend;
+        public IAudioBackend CurrentBackend { get => currentBackend; }
 
         public bool AvoidNextQueue { get; set; }
         public DiscordRpcClient Client { get; set; }

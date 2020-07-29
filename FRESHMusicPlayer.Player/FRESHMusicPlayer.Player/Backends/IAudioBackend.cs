@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FRESHMusicPlayer.Backends
 {
-    interface IAudioBackend : IDisposable
+    public interface IAudioBackend : IDisposable
     {
         void Play();
         void Pause();
