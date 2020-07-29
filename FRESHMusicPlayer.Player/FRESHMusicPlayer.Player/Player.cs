@@ -9,15 +9,12 @@ namespace FRESHMusicPlayer
 {
     public class Player
     {
-        //private WaveOutEvent outputDevice;
-        //public AudioFileReader AudioFile { get; set; }
 
         private IAudioBackend currentBackend;
 
         public bool AvoidNextQueue { get; set; }
         public DiscordRpcClient Client { get; set; }
 
-        //public int position;
         public float CurrentVolume { get; set; } = 1;
         public string FilePath { get; set; } = "";
         public bool Playing { get; set; }
@@ -117,7 +114,7 @@ namespace FRESHMusicPlayer
         public void PlayMusic(bool repeat = false)
         {
             if (!repeat && Queue.Count != 0)
-                FilePath = Queue[QueuePosition]; // Some functions want to play the same song again
+                FilePath = Queue[QueuePosition];
             QueuePosition++;
 
             void PMusic()
@@ -127,7 +124,7 @@ namespace FRESHMusicPlayer
 
                 if (true)
                 {
-                    currentBackend = new Backends.NAudioBackend(FilePath);
+                    currentBackend = new NAudioBackend(FilePath);
                 }
 
                 currentBackend.Play();
@@ -186,8 +183,6 @@ namespace FRESHMusicPlayer
         public void StopMusic()
         {
             if (!Playing) return;
-            //try
-            //{
                 //outputDevice.Dispose();
                 //outputDevice = null;
                 //AudioFile?.Dispose();
@@ -200,18 +195,6 @@ namespace FRESHMusicPlayer
                 Paused = false;
                 SongStopped?.Invoke(null, EventArgs.Empty);
                 //position = 0;
-            //}
-            //catch (NAudio.MmException) // This is an old workaround from the original FMP days. Shouldn't be needed anymore, but is kept anyway for the sake of
-            //{                          // stability.
-            //    Console.WriteLine("Things are breaking!");
-            //    Console.WriteLine(FilePath);
-            //    outputDevice?.Dispose();
-            //    outputDevice = new WaveOutEvent();
-            //    outputDevice.PlaybackStopped += OnPlaybackStopped; // Does the same initiallization PlayMusic() does.
-            //    AudioFile = new AudioFileReader(FilePath);
-            //    outputDevice.Init(AudioFile);
-            //    PlayMusic(true);
-            //}
         }
 
         /// <summary>
