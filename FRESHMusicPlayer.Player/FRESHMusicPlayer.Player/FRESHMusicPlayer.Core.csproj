@@ -63,6 +63,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Backends\IAudioBackend.cs" />
+    <Compile Include="Backends\NAudioBackend.cs" />
     <Compile Include="Handlers\DatabaseHandler.cs" />
     <Compile Include="Handlers\ErrorHandler.cs" />
     <Compile Include="Handlers\Integrations\Integration.cs" />

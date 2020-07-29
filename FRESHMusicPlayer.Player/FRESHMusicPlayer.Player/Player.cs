@@ -1,5 +1,4 @@
 ﻿using DiscordRPC;
-using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using FRESHMusicPlayer.Handlers;
@@ -9,8 +8,11 @@ namespace FRESHMusicPlayer
 {
     public class Player
     {
-        private WaveOutEvent outputDevice;
-        public AudioFileReader AudioFile { get; set; }
+        //private WaveOutEvent outputDevice;
+        //public AudioFileReader AudioFile { get; set; }
+
+        private Backends.IAudioBackend currentBackend;
+
         public bool AvoidNextQueue { get; set; }
         public DiscordRpcClient Client { get; set; }
 
@@ -64,7 +66,7 @@ namespace FRESHMusicPlayer
         public void PreviousSong()
         {
             if (QueuePosition <= 1) return;
-            if (Shuffle) Queue = this.ShuffleQueue(Queue);
+            if (Shuffle) Queue = PlayerUtils.ShuffleQueue(QueuePosition, Queue);
             QueuePosition -= 2;
             PlayMusic();
         }
@@ -85,12 +87,12 @@ namespace FRESHMusicPlayer
             }
 
             if (RepeatOnce) QueuePosition--; // Don't advance Queue, play the same thing again
-            if (Shuffle) Queue = this.ShuffleQueue(Queue);
+            if (Shuffle) Queue = PlayerUtils.ShuffleQueue(QueuePosition, Queue);
             PlayMusic();
         }
 
         // Music Playing Controls
-        private void OnPlaybackStopped(object sender, StoppedEventArgs args)
+        private void OnPlaybackStopped(object sender, EventArgs args)
         {
             if (!AvoidNextQueue) NextSong();
             else
@@ -105,7 +107,7 @@ namespace FRESHMusicPlayer
         /// <param name="seconds">The position in to the track to skip in, in seconds.</param>
         public void RepositionMusic(int seconds)
         {
-            AudioFile.CurrentTime = TimeSpan.FromSeconds(seconds);
+            currentBackend.CurrentTime = TimeSpan.FromSeconds(seconds);
         }
 
         /// <summary>
@@ -120,20 +122,18 @@ namespace FRESHMusicPlayer
 
             void PMusic()
             {
-                if (outputDevice == null)
+                //TODO: Check if FilePath is a file
+                //maybe we can use cd://2 for CD track 2, and anything else we can use the NAudio backend?
+
+                if (true)
                 {
-                    outputDevice = new WaveOutEvent();
-                    outputDevice.PlaybackStopped += OnPlaybackStopped;
+                    currentBackend = new Backends.NAudioBackend(FilePath);
                 }
 
-                if (AudioFile == null)
-                {
-                    AudioFile = new AudioFileReader(FilePath);
-                    outputDevice.Init(AudioFile);
-                }
+                currentBackend.Play();
+                currentBackend.Volume = CurrentVolume;
+                currentBackend.OnPlaybackStopped += OnPlaybackStopped;
 
-                outputDevice.Play();
-                outputDevice.Volume = CurrentVolume;
                 Playing = true;
             }
 
@@ -186,28 +186,32 @@ namespace FRESHMusicPlayer
         public void StopMusic()
         {
             if (!Playing) return;
-            try
-            {
-                outputDevice.Dispose();
-                outputDevice = null;
-                AudioFile?.Dispose();
-                AudioFile = null;
+            //try
+            //{
+                //outputDevice.Dispose();
+                //outputDevice = null;
+                //AudioFile?.Dispose();
+                //AudioFile = null;
+
+                currentBackend.Dispose();
+                currentBackend = null;
+
                 Playing = false;
                 Paused = false;
                 //position = 0;
                 SongStopped?.Invoke(null, EventArgs.Empty);
-            }
-            catch (NAudio.MmException) // This is an old workaround from the original FMP days. Shouldn't be needed anymore, but is kept anyway for the sake of
-            {                          // stability.
-                Console.WriteLine("Things are breaking!");
-                Console.WriteLine(FilePath);
-                outputDevice?.Dispose();
-                outputDevice = new WaveOutEvent();
-                outputDevice.PlaybackStopped += OnPlaybackStopped; // Does the same initiallization PlayMusic() does.
-                AudioFile = new AudioFileReader(FilePath);
-                outputDevice.Init(AudioFile);
-                PlayMusic(true);
-            }
+            //}
+            //catch (NAudio.MmException) // This is an old workaround from the original FMP days. Shouldn't be needed anymore, but is kept anyway for the sake of
+            //{                          // stability.
+            //    Console.WriteLine("Things are breaking!");
+            //    Console.WriteLine(FilePath);
+            //    outputDevice?.Dispose();
+            //    outputDevice = new WaveOutEvent();
+            //    outputDevice.PlaybackStopped += OnPlaybackStopped; // Does the same initiallization PlayMusic() does.
+            //    AudioFile = new AudioFileReader(FilePath);
+            //    outputDevice.Init(AudioFile);
+            //    PlayMusic(true);
+            //}
         }
 
         /// <summary>
@@ -215,7 +219,7 @@ namespace FRESHMusicPlayer
         /// </summary>
         public void PauseMusic()
         {
-            if (!Paused) outputDevice?.Pause();
+            if (!Paused) currentBackend?.Pause();
             Paused = true;
         } // Pauses the music without completely disposing it
 
@@ -224,7 +228,7 @@ namespace FRESHMusicPlayer
         /// </summary>
         public void ResumeMusic()
         {
-            if (Paused) outputDevice?.Play();
+            if (Paused) currentBackend?.Play();
             //playing = true;
             Paused = false;
         } // Resumes music that has been paused
@@ -235,7 +239,7 @@ namespace FRESHMusicPlayer
         /// </summary>
         public void UpdateSettings()
         {
-            outputDevice.Volume = CurrentVolume;
+            currentBackend.Volume = CurrentVolume;
         }
 
         // Other Logic Stuff
@@ -243,7 +247,7 @@ namespace FRESHMusicPlayer
         /// Returns a formatted string of the current playback position.
         /// </summary>
         /// <returns></returns>
-        public string SongPositionString() => $"{AudioFile.CurrentTime:c} / {AudioFile.TotalTime:c}";
+        public string SongPositionString() => $"{currentBackend.CurrentTime:c} / {currentBackend.TotalTime:c}";
 
 
         #endregion
