@@ -8,7 +8,7 @@ namespace FRESHMusicPlayer.Utilities
 {
     static class PlayerUtils
     {
-        private static Random rng = new Random();
+        private static readonly Random rng = new Random();
 
         public static List<string> ShuffleQueue(this Player player, List<string> list)
         {
