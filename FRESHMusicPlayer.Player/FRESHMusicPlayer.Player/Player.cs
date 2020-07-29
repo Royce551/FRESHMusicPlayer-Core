@@ -175,6 +175,11 @@ namespace FRESHMusicPlayer
                 var args = new PlaybackExceptionEventArgs {Details = "This audio file uses VBR \nor might be corrupt!"};
                 SongException?.Invoke(null, args);
             }
+            catch (Exception e)
+            {
+                var args = new PlaybackExceptionEventArgs {Details = $"{e.Message}\n{e.StackTrace}"};
+                SongException?.Invoke(null, args);
+            }
         }
 
         /// <summary>
