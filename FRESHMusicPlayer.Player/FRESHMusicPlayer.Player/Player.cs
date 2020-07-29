@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using FRESHMusicPlayer.Handlers;
 using FRESHMusicPlayer.Utilities;
+using FRESHMusicPlayer.Backends;
 
 namespace FRESHMusicPlayer
 {
@@ -11,7 +12,7 @@ namespace FRESHMusicPlayer
         //private WaveOutEvent outputDevice;
         //public AudioFileReader AudioFile { get; set; }
 
-        private Backends.IAudioBackend currentBackend;
+        private IAudioBackend currentBackend;
 
         public bool AvoidNextQueue { get; set; }
         public DiscordRpcClient Client { get; set; }
@@ -66,7 +67,7 @@ namespace FRESHMusicPlayer
         public void PreviousSong()
         {
             if (QueuePosition <= 1) return;
-            if (Shuffle) Queue = PlayerUtils.ShuffleQueue(QueuePosition, Queue);
+            if (Shuffle) Queue = this.ShuffleQueue(Queue);
             QueuePosition -= 2;
             PlayMusic();
         }
@@ -87,18 +88,17 @@ namespace FRESHMusicPlayer
             }
 
             if (RepeatOnce) QueuePosition--; // Don't advance Queue, play the same thing again
-            if (Shuffle) Queue = PlayerUtils.ShuffleQueue(QueuePosition, Queue);
+            if (Shuffle) Queue = this.ShuffleQueue(Queue);
             PlayMusic();
         }
 
         // Music Playing Controls
         private void OnPlaybackStopped(object sender, EventArgs args)
         {
-            if (!AvoidNextQueue) NextSong();
+            if (!AvoidNextQueue) 
+                NextSong();
             else
-            {
                 AvoidNextQueue = false;
-            }
         }
 
         /// <summary>
@@ -198,8 +198,8 @@ namespace FRESHMusicPlayer
 
                 Playing = false;
                 Paused = false;
-                //position = 0;
                 SongStopped?.Invoke(null, EventArgs.Empty);
+                //position = 0;
             //}
             //catch (NAudio.MmException) // This is an old workaround from the original FMP days. Shouldn't be needed anymore, but is kept anyway for the sake of
             //{                          // stability.
