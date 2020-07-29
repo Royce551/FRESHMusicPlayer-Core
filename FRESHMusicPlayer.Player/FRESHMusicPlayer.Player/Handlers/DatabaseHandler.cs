@@ -37,9 +37,11 @@ namespace FRESHMusicPlayer.Handlers
             var database = ReadSongs();
 
             database.Add(filepath); // Add the new song in
-            var format = new DatabaseFormat();
-            format.Version = 1;
-            format.Songs = new List<string>();
+            var format = new DatabaseFormat
+            {
+                Version = 1,
+                Songs = new List<string>()
+            };
             format.Songs = database;
 
             using (var file = File.CreateText(DatabasePath + "\\database.json"))
@@ -54,9 +56,11 @@ namespace FRESHMusicPlayer.Handlers
             var database = ReadSongs();
 
             database.AddRange(filepath);
-            var format = new DatabaseFormat();
-            format.Version = 1;
-            format.Songs = new List<string>();
+            var format = new DatabaseFormat
+            {
+                Version = 1,
+                Songs = new List<string>()
+            };
             format.Songs = database;
 
             using (var file = File.CreateText(DatabasePath + "\\database.json"))
@@ -71,9 +75,11 @@ namespace FRESHMusicPlayer.Handlers
             var database = ReadSongs();
 
             database.AddRange(filepath);
-            var format = new DatabaseFormat();
-            format.Version = 1;
-            format.Songs = new List<string>();
+            var format = new DatabaseFormat
+            {
+                Version = 1,
+                Songs = new List<string>()
+            };
             format.Songs = database;
 
             using (var file = File.CreateText(DatabasePath + "\\database.json"))
@@ -88,9 +94,11 @@ namespace FRESHMusicPlayer.Handlers
             var database = ReadSongs();
 
             database.AddRange(filepath);
-            var format = new DatabaseFormat();
-            format.Version = 1;
-            format.Songs = new List<string>();
+            var format = new DatabaseFormat
+            {
+                Version = 1,
+                Songs = new List<string>()
+            };
             format.Songs = database;
 
             using (var file = File.CreateText(DatabasePath + "\\database.json"))
@@ -104,10 +112,12 @@ namespace FRESHMusicPlayer.Handlers
         {
             var database = ReadSongs();
             database.Remove(filepath);
-            var format = new DatabaseFormat();
-            format.Version = 1;
-            format.Songs = database;
-            
+            var format = new DatabaseFormat
+            {
+                Version = 1,
+                Songs = database
+            };
+
 
             using (var file = File.CreateText(DatabasePath + "\\database.json"))
             {

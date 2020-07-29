@@ -9,28 +9,36 @@ namespace FRESHMusicPlayer.Backends
 {
     class NAudioBackend : IAudioBackend
     {
-        private WaveOutEvent outputDevice;
+        private readonly WaveOutEvent outputDevice;
 
         public event EventHandler<EventArgs> OnPlaybackStopped;
 
         public AudioFileReader AudioFile { get; set; }
 
-        public float Volume { get => AudioFile.Volume; set => AudioFile.Volume = value; }
-        public TimeSpan CurrentTime { get => AudioFile.CurrentTime; set => AudioFile.CurrentTime = value; }
-        public TimeSpan TotalTime { get => AudioFile.TotalTime; }
+        public float Volume 
+        { 
+            get => AudioFile.Volume; 
+            set => AudioFile.Volume = value; 
+        }
+        public TimeSpan CurrentTime 
+        {
+            get => AudioFile.CurrentTime;
+            set => AudioFile.CurrentTime = value;
+        }
+        public TimeSpan TotalTime => AudioFile.TotalTime; 
 
         public NAudioBackend(string file)
         {
-            if (outputDevice == null)
+            if (outputDevice is null)
             {
                 outputDevice = new WaveOutEvent();
-                outputDevice.PlaybackStopped += (Object o, StoppedEventArgs e) =>
+                outputDevice.PlaybackStopped += (object o, StoppedEventArgs e) =>
                 {
                     OnPlaybackStopped(this, new EventArgs());
                 };
             }
 
-            if (AudioFile == null)
+            if (AudioFile is null)
             {
                 AudioFile = new AudioFileReader(file);
                 outputDevice.Init(AudioFile);

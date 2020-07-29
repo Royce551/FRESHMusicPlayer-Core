@@ -8,16 +8,16 @@ namespace FRESHMusicPlayer.Utilities
 {
     static class PlayerUtils
     {
-        private static Random rng = new Random();
+        private static readonly Random rng = new Random();
 
-        public static List<string> ShuffleQueue(int queuePosition, List<string> list)
+        public static List<string> ShuffleQueue(this Player player, List<string> list)
         {
             var listtosort = new List<string>();
             var listtoreinsert = new List<string>();
             var number = 0;
             foreach (var x in list)
             {
-                if (queuePosition < number) listtosort.Add(x);
+                if (player.QueuePosition < number) listtosort.Add(x);
                 else listtoreinsert.Add(x);
                 number++;
             }
