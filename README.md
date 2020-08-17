@@ -11,8 +11,7 @@ Music Player component for Windows apps - designed to be used for the FRESHMusic
 using FRESHMusicPlayer;
 
 Player player = new Player();
-Console.WriteLine("What file do you want to play?");
-string path = Console.ReadLine();
+string path = "Can be a file path, or a URL to a network stream"
 player.AddQueue(path);  // Everything in FMP runs on a queue
 player.PlayMusic();  // Play through the queue
 ```
