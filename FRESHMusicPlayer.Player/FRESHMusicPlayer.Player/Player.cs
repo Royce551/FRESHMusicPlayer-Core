@@ -1,6 +1,11 @@
 ﻿using DiscordRPC;
 using System;
 using System.Collections.Generic;
+using System.Composition;
+using System.Composition.Hosting;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using FRESHMusicPlayer.Handlers;
 using FRESHMusicPlayer.Utilities;
 using FRESHMusicPlayer.Backends;
@@ -39,6 +44,11 @@ namespace FRESHMusicPlayer
         public event EventHandler SongStopped;
         public event EventHandler<PlaybackExceptionEventArgs> SongException;
 
+        private CompositionHost container = new ContainerConfiguration()
+                .WithAssemblies(Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll")
+                    .Select(n => { try { return Assembly.LoadFile(n); } catch (Exception ex) { Console.WriteLine(ex); return null; } })
+                    .Where(a => a != null))
+                .CreateContainer();
 
         #region CoreFMP
 
@@ -120,13 +130,9 @@ namespace FRESHMusicPlayer
 
             void PMusic()
             {
-                //TODO: Check if FilePath is a file
-                //maybe we can use cd://2 for CD track 2, and anything else we can use the NAudio backend?
-
-                if (true)
-                {
-                    currentBackend = new NAudioBackend(FilePath);
-                }
+                var factory = new AudioBackendFactory();
+                container.SatisfyImports(factory);
+                currentBackend = factory.CreateBackend(FilePath);
 
                 currentBackend.Play();
                 currentBackend.Volume = CurrentVolume;
