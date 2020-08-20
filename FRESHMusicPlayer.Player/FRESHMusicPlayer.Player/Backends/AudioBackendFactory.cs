@@ -1,24 +1,77 @@
 using System;
 using System.Collections.Generic;
-using System.Composition;
+using System.Composition.Hosting;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 
 namespace FRESHMusicPlayer.Backends
 {
-    class AudioBackendFactory
+    static class AudioBackendFactory
     {
-        [ImportMany]
-        private IEnumerable<Lazy<IAudioBackend>> backends { get; set; }
-        
-        ///<summary>
-        /// The exceptions that were raised by rejected backends.
-        ///</summary>
-        public IEnumerable<Exception> Exceptions { get; private set; } = null;
-        
-        public IAudioBackend CreateBackend(string filename)
+        private static ContainerConfiguration config = new ContainerConfiguration();
+        private static CompositionHost container;
+
+        private static List<string> directories = new List<string>();
+
+        private static IEnumerable<Assembly> LoadAssemblies(IEnumerable<string> paths)
+        {
+            foreach (var file in paths)
+            {
+                Assembly assembly;
+                try
+                {
+                    assembly = Assembly.LoadFrom(file);
+                    
+                    // Get types now, so that if it throws
+                    // an exception, it will happen here and get caught,
+                    // rather than in GetExports where it can't be.
+                    assembly.GetTypes();
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(ex);
+                    continue;
+                }
+                yield return assembly;
+            }
+        }
+
+        private static void AddDirectory(string path)
+        {
+            AppDomain.CurrentDomain.AppendPrivatePath(path);
+            try
+            {
+                config.WithAssemblies(LoadAssemblies(Directory.GetFiles(path, "*.dll")));
+            }
+            catch (DirectoryNotFoundException)
+            {
+                try
+                {
+                    Directory.CreateDirectory(path);
+                }
+                catch
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex);
+            }
+        }
+
+        static AudioBackendFactory()
+        {
+            AddDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backends"));
+            AddDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FRESHMusicPlayer", "Backends"));
+            config.WithAssembly(typeof(AudioBackendFactory).Assembly);
+            container = config.CreateContainer();
+        }
+
+        public static IAudioBackend CreateBackend(string filename)
         {
             var exlist = new List<Exception>();
-            Exceptions = exlist;
-            foreach (var lazybackend in backends)
+            foreach (var lazybackend in container.GetExports<Lazy<IAudioBackend>>())
             {
                 IAudioBackend backend = null;
                 try
@@ -31,7 +84,7 @@ namespace FRESHMusicPlayer.Backends
                 {
                     try
                     {
-                        backend?.Dispose();
+                        backend.Dispose();
                     }
                     catch
                     {
@@ -39,7 +92,7 @@ namespace FRESHMusicPlayer.Backends
                     exlist.Add(ex);
                 }
             }
-            throw new Exception($"No backend could be found to play {filename}.\n\n{String.Join("\n\n", Exceptions)}\n");
+            throw new Exception($"No backend could be found to play {filename}.\n\n{String.Join("\n\n", exlist)}\n");
         }
     }
 }

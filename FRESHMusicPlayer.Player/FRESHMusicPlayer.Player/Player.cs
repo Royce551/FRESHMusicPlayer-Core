@@ -1,8 +1,6 @@
 ﻿using DiscordRPC;
 using System;
 using System.Collections.Generic;
-using System.Composition;
-using System.Composition.Hosting;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -43,12 +41,6 @@ namespace FRESHMusicPlayer
         public event EventHandler SongChanged;
         public event EventHandler SongStopped;
         public event EventHandler<PlaybackExceptionEventArgs> SongException;
-
-        private CompositionHost container = new ContainerConfiguration()
-                .WithAssemblies(Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll")
-                    .Select(n => { try { return Assembly.LoadFile(n); } catch (Exception ex) { Console.WriteLine(ex); return null; } })
-                    .Where(a => a != null))
-                .CreateContainer();
 
         #region CoreFMP
 
@@ -130,9 +122,7 @@ namespace FRESHMusicPlayer
 
             void PMusic()
             {
-                var factory = new AudioBackendFactory();
-                container.SatisfyImports(factory);
-                currentBackend = factory.CreateBackend(FilePath);
+                currentBackend = AudioBackendFactory.CreateBackend(FilePath);
 
                 currentBackend.Play();
                 currentBackend.Volume = CurrentVolume;
