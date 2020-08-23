@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FRESHMusicPlayer.Core", "FR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinformsTest", "WinformsTest\WinformsTest.csproj", "{AA375910-6E80-4570-9663-8EA13238192A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GtkSharpTest", "GtkSharpTest\GtkSharpTest.csproj", "{8FE8EBF4-7E03-47B5-86AF-0DEA77260F24}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{AA375910-6E80-4570-9663-8EA13238192A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA375910-6E80-4570-9663-8EA13238192A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA375910-6E80-4570-9663-8EA13238192A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FE8EBF4-7E03-47B5-86AF-0DEA77260F24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FE8EBF4-7E03-47B5-86AF-0DEA77260F24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FE8EBF4-7E03-47B5-86AF-0DEA77260F24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FE8EBF4-7E03-47B5-86AF-0DEA77260F24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
