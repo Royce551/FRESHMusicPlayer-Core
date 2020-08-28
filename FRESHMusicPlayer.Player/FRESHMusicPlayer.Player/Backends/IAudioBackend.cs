@@ -8,6 +8,7 @@ namespace FRESHMusicPlayer.Backends
 {
     public interface IAudioBackend : IDisposable
     {
+        void LoadSong(string file);
         void Play();
         void Pause();
 

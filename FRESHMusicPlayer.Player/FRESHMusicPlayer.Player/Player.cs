@@ -1,6 +1,9 @@
 ﻿using DiscordRPC;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using FRESHMusicPlayer.Handlers;
 using FRESHMusicPlayer.Utilities;
 using FRESHMusicPlayer.Backends;
@@ -38,7 +41,6 @@ namespace FRESHMusicPlayer
         public event EventHandler SongChanged;
         public event EventHandler SongStopped;
         public event EventHandler<PlaybackExceptionEventArgs> SongException;
-
 
         #region CoreFMP
 
@@ -120,13 +122,7 @@ namespace FRESHMusicPlayer
 
             void PMusic()
             {
-                //TODO: Check if FilePath is a file
-                //maybe we can use cd://2 for CD track 2, and anything else we can use the NAudio backend?
-
-                if (true)
-                {
-                    currentBackend = new NAudioBackend(FilePath);
-                }
+                currentBackend = AudioBackendFactory.CreateBackend(FilePath);
 
                 currentBackend.Play();
                 currentBackend.Volume = CurrentVolume;

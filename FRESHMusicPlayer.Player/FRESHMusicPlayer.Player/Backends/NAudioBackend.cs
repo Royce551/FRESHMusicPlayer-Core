@@ -1,12 +1,14 @@
 ﻿using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace FRESHMusicPlayer.Backends
 {
+    [Export(typeof(IAudioBackend))]
     class NAudioBackend : IAudioBackend
     {
         private readonly WaveOutEvent outputDevice;
@@ -27,7 +29,7 @@ namespace FRESHMusicPlayer.Backends
         }
         public TimeSpan TotalTime => AudioFile.TotalTime; 
 
-        public NAudioBackend(string file)
+        public NAudioBackend()
         {
             if (outputDevice is null)
             {
@@ -37,12 +39,16 @@ namespace FRESHMusicPlayer.Backends
                     OnPlaybackStopped(this, new EventArgs());
                 };
             }
+        }
 
-            if (AudioFile is null)
+        public void LoadSong(string file)
+        {
+            if (AudioFile != null)
             {
-                AudioFile = new AudioFileReader(file);
-                outputDevice.Init(AudioFile);
+                AudioFile.Dispose();
             }
+            AudioFile = new AudioFileReader(file);
+            outputDevice.Init(AudioFile);
         }
 
         public void Play()
