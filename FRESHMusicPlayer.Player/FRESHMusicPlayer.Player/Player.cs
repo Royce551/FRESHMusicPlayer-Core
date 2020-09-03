@@ -79,6 +79,9 @@ namespace FRESHMusicPlayer
         public void NextSong(bool avoidNext = false)
         {
             AvoidNextQueue = avoidNext;
+            if (RepeatOnce) QueuePosition--; // Don't advance Queue, play the same thing again
+            if (Shuffle) Queue = this.ShuffleQueue(Queue);
+
             if (QueuePosition >= Queue.Count)
             {
                 Queue.Clear();
@@ -86,9 +89,6 @@ namespace FRESHMusicPlayer
                 StopMusic();
                 return;
             }
-
-            if (RepeatOnce) QueuePosition--; // Don't advance Queue, play the same thing again
-            if (Shuffle) Queue = this.ShuffleQueue(Queue);
             PlayMusic();
         }
 
