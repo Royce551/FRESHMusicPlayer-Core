@@ -43,7 +43,6 @@ namespace WinformsTest
 
         private void button2_Click(object sender, EventArgs e)
         {
-            player.StopMusic();
         }
 
         private void button3_Click(object sender, EventArgs e)

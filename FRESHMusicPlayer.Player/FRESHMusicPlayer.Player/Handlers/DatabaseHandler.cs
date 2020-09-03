@@ -1,8 +1,11 @@
 ﻿using FRESHMusicPlayer.Utilities;
+using Lite = LiteDB;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+
 namespace FRESHMusicPlayer.Handlers
 {
     public static class DatabaseHandler
@@ -13,6 +16,7 @@ namespace FRESHMusicPlayer.Handlers
         {
             DatabasePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\FRESHMusicPlayer";
         }
+        #region v1
         /// <summary>
         /// Returns all of the tracks in the database.
         /// </summary>
@@ -133,6 +137,8 @@ namespace FRESHMusicPlayer.Handlers
                 File.WriteAllText(DatabasePath + "\\database.json", @"{""Version"":1,""Songs"":[]}");
             }
         }
+        #endregion
+
     }
 
 }
