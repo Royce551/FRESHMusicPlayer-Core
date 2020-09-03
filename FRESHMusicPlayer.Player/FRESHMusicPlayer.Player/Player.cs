@@ -59,8 +59,11 @@ namespace FRESHMusicPlayer
             Queue.AddRange(filePaths);
         }
 
-        public void ClearQueue() => Queue.Clear();
-
+        public void ClearQueue()
+        {
+            Queue.Clear();
+            QueuePosition = 0;
+        }
         /// <summary>
         /// Skips to the previous track in the Queue. If there are no tracks for the player to go back to, nothing will happen.
         /// </summary>
