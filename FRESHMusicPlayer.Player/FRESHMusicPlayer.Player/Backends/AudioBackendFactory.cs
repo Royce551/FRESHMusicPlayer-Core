@@ -39,7 +39,7 @@ namespace FRESHMusicPlayer.Backends
 
         private static void AddDirectory(string path)
         {
-            AppDomain.CurrentDomain.AppendPrivatePath(path);
+            //AppDomain.CurrentDomain.AppendPrivatePath(path);
             try
             {
                 config.WithAssemblies(LoadAssemblies(Directory.GetFiles(path, "*.dll")));
