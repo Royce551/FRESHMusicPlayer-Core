@@ -41,6 +41,7 @@ namespace FRESHMusicPlayer
         public event EventHandler SongChanged;
         public event EventHandler SongStopped;
         public event EventHandler<PlaybackExceptionEventArgs> SongException;
+        public event EventHandler QueueChanged;
 
         #region CoreFMP
 
@@ -52,17 +53,20 @@ namespace FRESHMusicPlayer
         public void AddQueue(string filePath)
         {
             Queue.Add(filePath);
+            QueueChanged?.Invoke(null, EventArgs.Empty);
         }
 
         public void AddQueue(string[] filePaths)
         {
             Queue.AddRange(filePaths);
+            QueueChanged?.Invoke(null, EventArgs.Empty);
         }
 
         public void ClearQueue()
         {
             Queue.Clear();
             QueuePosition = 0;
+            QueueChanged?.Invoke(null, EventArgs.Empty);
         }
         /// <summary>
         /// Skips to the previous track in the Queue. If there are no tracks for the player to go back to, nothing will happen.
@@ -122,7 +126,7 @@ namespace FRESHMusicPlayer
             if (!repeat && Queue.Count != 0)
                 FilePath = Queue[QueuePosition];
             QueuePosition++;
-
+            QueueChanged?.Invoke(null, EventArgs.Empty);
             void PMusic()
             {
                 currentBackend = AudioBackendFactory.CreateBackend(FilePath);
