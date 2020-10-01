@@ -1,3 +1,4 @@
+using LiteDB;
 using System.Collections.Generic;
 
 namespace FRESHMusicPlayer.Utilities
@@ -15,5 +16,11 @@ namespace FRESHMusicPlayer.Utilities
         public string Album { get; set; }
         public int TrackNumber { get; set; }
         public int Length { get; set; }
+    }
+    public class DatabasePlaylist
+    {
+        public int DatabasePlaylistID { get; set; }
+        public string Name { get; set; }
+        public List<string> Tracks { get; set; }
     }
 }

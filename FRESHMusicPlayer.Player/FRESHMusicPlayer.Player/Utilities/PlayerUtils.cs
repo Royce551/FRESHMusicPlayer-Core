@@ -34,5 +34,15 @@ namespace FRESHMusicPlayer.Utilities
             foreach (var x in listtosort) listtoreinsert.Add(x);
             return listtoreinsert;
         }
+        public static string TruncateBytes(string str, int bytes)
+        {
+            if (Encoding.UTF8.GetByteCount(str) <= bytes) return str;
+            int i = 0;
+            while (true)
+            {
+                if (Encoding.UTF8.GetByteCount(str.Substring(0, i)) > bytes) return str.Substring(0, i);
+                i++;
+            }
+        }
     }
 }

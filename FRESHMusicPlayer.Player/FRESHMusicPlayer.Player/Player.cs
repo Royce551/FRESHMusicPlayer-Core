@@ -23,6 +23,7 @@ namespace FRESHMusicPlayer
         public string FilePath { get; set; } = "";
         public bool Playing { get; set; }
         public bool Paused { get; set; }
+        public bool PauseAfterCurrentTrack { get; set; } = false;
 
         public bool RepeatOnce { get; set; } = false;
 
@@ -31,10 +32,6 @@ namespace FRESHMusicPlayer
         // TODO:  ^^  for the two properties above, check if their setters are ever used 
         public List<string> Queue { get; private set; } = new List<string>();
         public int QueuePosition { get; set; }
-
-        public DateTime LastUpdateCheck { get; set; }
-
-
         /// <summary>
         /// Raised whenever a new track is being played.
         /// </summary>
@@ -55,17 +52,27 @@ namespace FRESHMusicPlayer
             Queue.Add(filePath);
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
-
         public void AddQueue(string[] filePaths)
         {
             Queue.AddRange(filePaths);
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
-
         public void ClearQueue()
         {
             Queue.Clear();
             QueuePosition = 0;
+            QueueChanged?.Invoke(null, EventArgs.Empty);
+        }
+        public void ShuffleQueue()
+        {
+            Queue = this.ShuffleQueue(Queue);
+            QueueChanged?.Invoke(null, EventArgs.Empty);
+        }
+        public void RemoveQueue(string path)
+        {
+            var index = Queue.IndexOf(path);
+            Queue.RemoveAt(index);
+            if (QueuePosition >= index) QueuePosition--;
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
         /// <summary>
@@ -86,6 +93,11 @@ namespace FRESHMusicPlayer
         public void NextSong(bool avoidNext = false)
         {
             AvoidNextQueue = avoidNext;
+            if (PauseAfterCurrentTrack)
+            {
+                PauseMusic();
+                return;
+            }
             if (RepeatOnce) QueuePosition--; // Don't advance Queue, play the same thing again
             if (Shuffle) Queue = this.ShuffleQueue(Queue);
 
@@ -264,8 +276,8 @@ namespace FRESHMusicPlayer
         {
             Client?.SetPresence(new RichPresence()
                 {
-                    Details = Title,
-                    State = $"by {Artist}",
+                    Details = PlayerUtils.TruncateBytes(Title, 120),
+                    State = $"by {PlayerUtils.TruncateBytes(Artist, 120)}",
                     Assets = new Assets()
                     {
                         LargeImageKey = "icon",
