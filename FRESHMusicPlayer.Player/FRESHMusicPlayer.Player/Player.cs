@@ -23,7 +23,6 @@ namespace FRESHMusicPlayer
         public string FilePath { get; set; } = "";
         public bool Playing { get; set; }
         public bool Paused { get; set; }
-        public bool PauseAfterCurrentTrack { get; set; } = false;
 
         public bool RepeatOnce { get; set; } = false;
 
@@ -68,11 +67,11 @@ namespace FRESHMusicPlayer
             Queue = this.ShuffleQueue(Queue);
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
-        public void RemoveQueue(string path)
+        public void RemoveQueue(int index)
         {
-            var index = Queue.IndexOf(path);
+            string currentTrack = Queue.Find(x => x == Queue[QueuePosition]); // TODO: this might be able to be optimized further
             Queue.RemoveAt(index);
-            if (QueuePosition >= index) QueuePosition--;
+            QueuePosition = Queue.FindIndex(y => y == currentTrack);
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
         /// <summary>
@@ -93,11 +92,6 @@ namespace FRESHMusicPlayer
         public void NextSong(bool avoidNext = false)
         {
             AvoidNextQueue = avoidNext;
-            if (PauseAfterCurrentTrack)
-            {
-                PauseMusic();
-                return;
-            }
             if (RepeatOnce) QueuePosition--; // Don't advance Queue, play the same thing again
             if (Shuffle) Queue = this.ShuffleQueue(Queue);
 
@@ -252,7 +246,7 @@ namespace FRESHMusicPlayer
         /// </summary>
         /// <returns></returns>
         public string SongPositionString() => $"{currentBackend.CurrentTime:c} / {currentBackend.TotalTime:c}";
-
+        public string VersionString() => $"FMP Core Ver. 2.7.0";
 
         #endregion
 
