@@ -12,15 +12,13 @@ namespace FRESHMusicPlayer
 {
     public class Player
     {
-
-        private IAudioBackend currentBackend;
-        public IAudioBackend CurrentBackend { get => currentBackend; }
+        public IAudioBackend CurrentBackend { get; private set; }
 
         public bool AvoidNextQueue { get; set; }
         public DiscordRpcClient Client { get; set; }
 
         public float CurrentVolume { get; set; } = 1;
-        public string FilePath { get; set; } = "";
+        public string FilePath { get; set; } = string.Empty;
         public bool Playing { get; set; }
         public bool Paused { get; set; }
 
@@ -69,7 +67,8 @@ namespace FRESHMusicPlayer
         }
         public void RemoveQueue(int index)
         {
-            string currentTrack = Queue.Find(x => x == Queue[QueuePosition]); // TODO: this might be able to be optimized further
+            string currentTrack = Queue.FirstOrDefault(x => x == Queue[QueuePosition]); // TODO: this might be able to be optimized further
+            if (currentTrack is null) return;
             Queue.RemoveAt(index);
             QueuePosition = Queue.FindIndex(y => y == currentTrack);
             QueueChanged?.Invoke(null, EventArgs.Empty);
@@ -120,7 +119,7 @@ namespace FRESHMusicPlayer
         /// <param name="seconds">The position in to the track to skip in, in seconds.</param>
         public void RepositionMusic(int seconds)
         {
-            currentBackend.CurrentTime = TimeSpan.FromSeconds(seconds);
+            CurrentBackend.CurrentTime = TimeSpan.FromSeconds(seconds);
         }
 
         /// <summary>
@@ -135,11 +134,11 @@ namespace FRESHMusicPlayer
             QueueChanged?.Invoke(null, EventArgs.Empty);
             void PMusic()
             {
-                currentBackend = AudioBackendFactory.CreateBackend(FilePath);
+                CurrentBackend = AudioBackendFactory.CreateBackend(FilePath);
 
-                currentBackend.Play();
-                currentBackend.Volume = CurrentVolume;
-                currentBackend.OnPlaybackStopped += OnPlaybackStopped;
+                CurrentBackend.Play();
+                CurrentBackend.Volume = CurrentVolume;
+                CurrentBackend.OnPlaybackStopped += OnPlaybackStopped;
 
                 Playing = true;
             }
@@ -160,7 +159,7 @@ namespace FRESHMusicPlayer
                 SongChanged?.Invoke(null,
                     EventArgs.Empty); // Now that playback has started without any issues, fire the song changed event.
             }
-            catch (System.IO.FileNotFoundException)
+            catch (FileNotFoundException)
             {
                 var args = new PlaybackExceptionEventArgs {Details = "That's not a valid file path!"};
                 SongException?.Invoke(null, args);
@@ -198,18 +197,13 @@ namespace FRESHMusicPlayer
         public void StopMusic()
         {
             if (!Playing) return;
-                //outputDevice.Dispose();
-                //outputDevice = null;
-                //AudioFile?.Dispose();
-                //AudioFile = null;
 
-                currentBackend.Dispose();
-                currentBackend = null;
+            CurrentBackend.Dispose();
+            CurrentBackend = null;
 
-                Playing = false;
-                Paused = false;
-                SongStopped?.Invoke(null, EventArgs.Empty);
-                //position = 0;
+            Playing = false;
+            Paused = false;
+            SongStopped?.Invoke(null, EventArgs.Empty);
         }
 
         /// <summary>
@@ -217,7 +211,7 @@ namespace FRESHMusicPlayer
         /// </summary>
         public void PauseMusic()
         {
-            if (!Paused) currentBackend?.Pause();
+            if (!Paused) CurrentBackend?.Pause();
             Paused = true;
         } // Pauses the music without completely disposing it
 
@@ -226,7 +220,7 @@ namespace FRESHMusicPlayer
         /// </summary>
         public void ResumeMusic()
         {
-            if (Paused) currentBackend?.Play();
+            if (Paused) CurrentBackend?.Play();
             //playing = true;
             Paused = false;
         } // Resumes music that has been paused
@@ -237,7 +231,7 @@ namespace FRESHMusicPlayer
         /// </summary>
         public void UpdateSettings()
         {
-            currentBackend.Volume = CurrentVolume;
+            CurrentBackend.Volume = CurrentVolume;
         }
 
         // Other Logic Stuff
@@ -245,8 +239,8 @@ namespace FRESHMusicPlayer
         /// Returns a formatted string of the current playback position.
         /// </summary>
         /// <returns></returns>
-        public string SongPositionString() => $"{currentBackend.CurrentTime:c} / {currentBackend.TotalTime:c}";
-        public string VersionString() => $"FMP Core Ver. 2.7.0";
+        public string SongPositionString() => $"{CurrentBackend.CurrentTime:c} / {CurrentBackend.TotalTime:c}";
+        public string VersionString() => $"FRESHMusicPlayer Core Ver. 2.8.0";
 
         #endregion
 
@@ -269,16 +263,16 @@ namespace FRESHMusicPlayer
         public void UpdateRPC(string Activity, string Artist = null, string Title = null)
         {
             Client?.SetPresence(new RichPresence()
+            {
+                Details = PlayerUtils.TruncateBytes(Title, 120),
+                State = $"by {PlayerUtils.TruncateBytes(Artist, 120)}",
+                Assets = new Assets()
                 {
-                    Details = PlayerUtils.TruncateBytes(Title, 120),
-                    State = $"by {PlayerUtils.TruncateBytes(Artist, 120)}",
-                    Assets = new Assets()
-                    {
-                        LargeImageKey = "icon",
-                        SmallImageKey = Activity
-                    },
-                    Timestamps = Timestamps.Now
-                }
+                    LargeImageKey = "icon",
+                    SmallImageKey = Activity
+                },
+                Timestamps = Timestamps.Now
+            }
             );
         }
 
