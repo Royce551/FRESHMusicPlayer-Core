@@ -67,10 +67,9 @@ namespace FRESHMusicPlayer
         }
         public void RemoveQueue(int index)
         {
-            string currentTrack = Queue.FirstOrDefault(x => x == Queue[QueuePosition]); // TODO: this might be able to be optimized further
-            if (currentTrack is null) return;
             Queue.RemoveAt(index);
-            QueuePosition = Queue.FindIndex(y => y == currentTrack);
+            if (index <= (QueuePosition - 1)) QueuePosition--;
+            if (QueuePosition < 0) QueuePosition = 1;
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
         /// <summary>
@@ -240,7 +239,6 @@ namespace FRESHMusicPlayer
         /// </summary>
         /// <returns></returns>
         public string SongPositionString() => $"{CurrentBackend.CurrentTime:c} / {CurrentBackend.TotalTime:c}";
-        public string VersionString() => $"FRESHMusicPlayer Core Ver. 2.8.0";
 
         #endregion
 
@@ -265,7 +263,7 @@ namespace FRESHMusicPlayer
             Client?.SetPresence(new RichPresence()
             {
                 Details = PlayerUtils.TruncateBytes(Title, 120),
-                State = $"by {PlayerUtils.TruncateBytes(Artist, 120)}",
+                State = PlayerUtils.TruncateBytes(Artist, 120),
                 Assets = new Assets()
                 {
                     LargeImageKey = "icon",

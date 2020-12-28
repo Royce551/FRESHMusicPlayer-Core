@@ -14,7 +14,6 @@ namespace FRESHMusicPlayer.Handlers
         public static readonly string DatabasePath;
         static DatabaseHandler()
         {
-            DatabasePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\FRESHMusicPlayer";
             DatabasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FRESHMusicPlayer");
         }
         #region v1
