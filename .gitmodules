@@ -1,0 +1,3 @@
+[submodule "FRESHMusicPlayer.Player/CDLib"]
+	path = FRESHMusicPlayer.Player/CDLib
+	url = https://github.com/reflectronic/CDLib
