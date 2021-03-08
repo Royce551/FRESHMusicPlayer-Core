@@ -14,7 +14,7 @@ namespace FRESHMusicPlayer.Utilities
         {
             var listtosort = new List<string>();
             var listtoreinsert = new List<string>();
-            var number = 0;
+            var number = 0;  
             foreach (var x in list)
             {
                 if (player.QueuePosition < number) listtosort.Add(x);
