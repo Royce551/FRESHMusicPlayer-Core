@@ -22,64 +22,24 @@ namespace FRESHMusicPlayer
         public bool Playing { get; set; }
         public bool Paused { get; set; }
 
-        public bool RepeatOnce { get; set; } = false;
+        public PlayQueue Queue { get; set; } = new PlayQueue();
 
-        public bool Shuffle { get; set; } = false;
-
-        // TODO:  ^^  for the two properties above, check if their setters are ever used 
-        public List<string> Queue { get; private set; } = new List<string>();
-        public int QueuePosition { get; set; }
         /// <summary>
         /// Raised whenever a new track is being played.
         /// </summary>
         public event EventHandler SongChanged;
         public event EventHandler SongStopped;
         public event EventHandler<PlaybackExceptionEventArgs> SongException;
-        public event EventHandler QueueChanged;
 
         #region CoreFMP
 
-        // Queue System
-        /// <summary>
-        /// Adds a track to the <see cref="Queue"/>.
-        /// </summary>
-        /// <param name="filePath">The file path to the track to add.</param>
-        public void AddQueue(string filePath)
-        {
-            Queue.Add(filePath);
-            QueueChanged?.Invoke(null, EventArgs.Empty);
-        }
-        public void AddQueue(string[] filePaths)
-        {
-            Queue.AddRange(filePaths);
-            QueueChanged?.Invoke(null, EventArgs.Empty);
-        }
-        public void ClearQueue()
-        {
-            Queue.Clear();
-            QueuePosition = 0;
-            QueueChanged?.Invoke(null, EventArgs.Empty);
-        }
-        public void ShuffleQueue()
-        {
-            Queue = this.ShuffleQueue(Queue);
-            QueueChanged?.Invoke(null, EventArgs.Empty);
-        }
-        public void RemoveQueue(int index)
-        {
-            Queue.RemoveAt(index);
-            if (index <= (QueuePosition - 1)) QueuePosition--;
-            if (QueuePosition < 0) QueuePosition = 1;
-            QueueChanged?.Invoke(null, EventArgs.Empty);
-        }
         /// <summary>
         /// Skips to the previous track in the Queue. If there are no tracks for the player to go back to, nothing will happen.
         /// </summary>
         public void PreviousSong()
         {
-            if (QueuePosition <= 1) return;
-            if (Shuffle) Queue = this.ShuffleQueue(Queue);
-            QueuePosition -= 2;
+            if (Queue.Position <= 1) return;
+            Queue.Position -= 2;
             PlayMusic();
         }
 
@@ -90,13 +50,11 @@ namespace FRESHMusicPlayer
         public void NextSong(bool avoidNext = false)
         {
             AvoidNextQueue = avoidNext;
-            if (RepeatOnce) QueuePosition--; // Don't advance Queue, play the same thing again
-            if (Shuffle) Queue = this.ShuffleQueue(Queue);
+            if (Queue.RepeatMode == RepeatMode.RepeatOne) Queue.Position--; // Don't advance Queue, play the same thing again
 
-            if (QueuePosition >= Queue.Count)
+            if (Queue.Position >= Queue.Queue.Count)
             {
                 Queue.Clear();
-                QueuePosition = 0;
                 StopMusic();
                 return;
             }
@@ -127,10 +85,9 @@ namespace FRESHMusicPlayer
         /// <param name="repeat">If true, avoids dequeuing the next track. Not to be used for anything other than the player.</param>
         public void PlayMusic(bool repeat = false)
         {
-            if (!repeat && Queue.Count != 0)
-                FilePath = Queue[QueuePosition];
-            QueuePosition++;
-            QueueChanged?.Invoke(null, EventArgs.Empty);
+            if (!repeat && Queue.Queue.Count != 0)
+                FilePath = Queue.Queue[Queue.Position];
+            Queue.Position++;
             void PMusic()
             {
                 CurrentBackend = AudioBackendFactory.CreateBackend(FilePath);
