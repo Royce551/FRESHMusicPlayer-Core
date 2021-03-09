@@ -22,7 +22,6 @@ namespace FRESHMusicPlayer
                     ShuffleQueue();
                 }
                 queue = value;
-                QueueChanged?.Invoke(null, EventArgs.Empty);
             }
         }
 
@@ -47,19 +46,38 @@ namespace FRESHMusicPlayer
 
         private readonly Random rng = new Random();
 
-        public void Add(string filePath) => Queue.Add(filePath);
-        public void Add(string[] filePaths) => Queue.AddRange(filePaths);
+        public void Add(string filePath)
+        {
+            Queue.Add(filePath);
+            if (Shuffle)
+                ShuffleQueue();
+            QueueChanged?.Invoke(null, EventArgs.Empty);
+        }
+        public void Add(string[] filePaths)
+        {
+            Queue.AddRange(filePaths);
+            if (Shuffle)
+                ShuffleQueue();
+            QueueChanged?.Invoke(null, EventArgs.Empty);
+        }
         public void Clear()
         {
             Queue.Clear();
             Position = 0;
+            QueueChanged?.Invoke(null, EventArgs.Empty);
         }
-        public void ManualShuffle() => ShuffleQueue();
+        public void ManualShuffle()
+        {
+            if (Shuffle)
+                ShuffleQueue();
+            QueueChanged?.Invoke(null, EventArgs.Empty);
+        }
         public void Remove(int index)
         {
             if (index <= (Position - 1)) Position--;
             if (Position < 0) Position = 1;
             Queue.RemoveAt(index);
+            QueueChanged?.Invoke(null, EventArgs.Empty);
         }
 
         private void ShuffleQueue()
