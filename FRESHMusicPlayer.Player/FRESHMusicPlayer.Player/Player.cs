@@ -1,5 +1,4 @@
-﻿using DiscordRPC;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,21 +16,37 @@ namespace FRESHMusicPlayer
         /// </summary>
         public IAudioBackend CurrentBackend { get; private set; }
         /// <summary>
+        /// The current playback position./>
+        /// </summary>
+        public TimeSpan CurrentTime { get => CurrentBackend.CurrentTime; set => CurrentBackend.CurrentTime = value; }
+        /// <summary>
+        /// The total length of the current track.
+        /// </summary>
+        public TimeSpan TotalTime { get => CurrentBackend.TotalTime; }
+        /// <summary>
         /// If true, suppresses an internal event handler. I honestly don't understand how this thing works; just make sure to keep
         /// setting this to false, or things will explode.
         /// </summary>
         public bool AvoidNextQueue { get; set; }
-        public DiscordRpcClient Client { get; set; }
 
+        private float volume = 1f;
         /// <summary>
         /// The current volume, from 0 to 1.
         /// </summary>
-        public float CurrentVolume { get; set; } = 1;
+        public float Volume
+        {
+            get => volume;
+            set
+            {
+                volume = value;
+                CurrentBackend.Volume = volume;
+            }
+        }
         /// <summary>
         /// The current path the Player is playing. Keep in mind that this may not necessarily be a file. For example, it could be the
         /// URL to a network stream.
         /// </summary>
-        public string FilePath { get; set; } = string.Empty;
+        public string FilePath { get; private set; } = string.Empty;
         /// <summary>
         /// Whether the audio backend and file has been loaded and things are ready to go. If you interact with the Player everything
         /// will explode.
@@ -112,6 +127,15 @@ namespace FRESHMusicPlayer
         }
 
         /// <summary>
+        /// Plays a track. This is equivalent to calling Queue.Add() and then PlayMusic()./>
+        /// </summary>
+        /// <param name="path">The track to play</param>
+        public void PlayMusic(string path)
+        {
+            Queue.Add(path);
+            PlayMusic();
+        }
+        /// <summary>
         /// Starts playing the Queue. In order to play a track, you must first add it to the Queue using <see cref="AddQueue(string)"/>.
         /// </summary>
         /// <param name="repeat">If true, avoids dequeuing the next track. Not to be used for anything other than the player.</param>
@@ -125,7 +149,7 @@ namespace FRESHMusicPlayer
                 CurrentBackend = AudioBackendFactory.CreateBackend(FilePath);
 
                 CurrentBackend.Play();
-                CurrentBackend.Volume = CurrentVolume;
+                CurrentBackend.Volume = Volume;
                 CurrentBackend.OnPlaybackStopped += OnPlaybackStopped;
 
                 FileLoaded = true;
@@ -199,72 +223,57 @@ namespace FRESHMusicPlayer
         /// </summary>
         public void PauseMusic()
         {
-            if (!Paused) CurrentBackend?.Pause();
+            if (!Paused) 
+                CurrentBackend?.Pause();
             Paused = true;
-        } // Pauses the music without completely disposing it
+        }
 
         /// <summary>
         /// Resumes playback.
         /// </summary>
         public void ResumeMusic()
         {
-            if (Paused) CurrentBackend?.Play();
-            //playing = true;
+            if (Paused) 
+                CurrentBackend?.Play();
             Paused = false;
-        } // Resumes music that has been paused
-
-        /// <summary>
-        /// Updates the volume of the player during playback to the value of <see cref="CurrentVolume"/>.
-        /// Even if you don't call this, the volume of the player will update whenever the next track plays.
-        /// </summary>
-        public void UpdateSettings()
-        {
-            CurrentBackend.Volume = CurrentVolume;
         }
-
-        // Other Logic Stuff
-        /// <summary>
-        /// Returns a formatted string of the current playback position.
-        /// </summary>
-        /// <returns></returns>
-        public string SongPositionString() => $"{CurrentBackend.CurrentTime:c} / {CurrentBackend.TotalTime:c}";
 
         #endregion
 
         // Integration
 
-        #region DiscordRPC
-        /// <summary>
-        /// Initializes the Discord RPC client. Once it has been initialized, you can set the presence by using <see cref="UpdateRPC(string, string, string)"/>
-        /// </summary>
-        /// <param name="applicationID">The application ID of your app</param>
-        public void InitDiscordRPC(string applicationID)
-        { // FMP application ID - 656678380283887626
-            Client = new DiscordRpcClient(applicationID);
+        //#region DiscordRPC
+        ///// <summary>
+        ///// Initializes the Discord RPC client. Once it has been initialized, you can set the presence by using <see cref="UpdateRPC(string, string, string)"/>
+        ///// </summary>
+        ///// <param name="applicationID">The application ID of your app</param>
+        //public void InitDiscordRPC(string applicationID)
+        //{ // FMP application ID - 656678380283887626
+        //    Client = new DiscordRpcClient(applicationID);
 
-            Client.OnReady += (sender, e) => { Console.WriteLine("Received Ready from user {0}", e.User.Username); };
-            Client.OnPresenceUpdate += (sender, e) => { Console.WriteLine("Received Update! {0}", e.Presence); };
-            Client.Initialize();
-        }
+        //    Client.OnReady += (sender, e) => { Console.WriteLine("Received Ready from user {0}", e.User.Username); };
+        //    Client.OnPresenceUpdate += (sender, e) => { Console.WriteLine("Received Update! {0}", e.Presence); };
+        //    Client.Initialize();
+        //}
 
-        public void UpdateRPC(string Activity, string Artist = null, string Title = null)
-        {
-            Client?.SetPresence(new RichPresence()
-            {
-                Details = PlayerUtils.TruncateBytes(Title, 120),
-                State = PlayerUtils.TruncateBytes(Artist, 120),
-                Assets = new Assets()
-                {
-                    LargeImageKey = "icon",
-                    SmallImageKey = Activity
-                },
-                Timestamps = Timestamps.Now
-            }
-            );
-        }
+        //public void UpdateRPC(string Activity, string Artist = null, string Title = null)
+        //{
+        //    Client?.SetPresence(new RichPresence()
+        //    {
+        //        Details = PlayerUtils.TruncateBytes(Title, 120),
+        //        State = PlayerUtils.TruncateBytes(Artist, 120),
+        //        Assets = new Assets()
+        //        {
+        //            LargeImageKey = "icon",
+        //            SmallImageKey = Activity
+        //        },
+        //        Timestamps = Timestamps.Now
+        //    }
+        //    );
+        //}
 
-        public void DisposeRPC() => Client?.Dispose();
+        //public void DisposeRPC() => Client?.Dispose();
 
-        #endregion
+        //#endregion
     }
 }
