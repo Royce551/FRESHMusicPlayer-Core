@@ -4,8 +4,15 @@ using System.Text;
 
 namespace FRESHMusicPlayer
 {
+    /// <summary>
+    /// Represents the player's queue.
+    /// </summary>
     public class PlayQueue
     {
+        /// <summary>
+        /// Gets or sets the current queue. This is settable for situations where there's no method for what you want to do.
+        /// Use the methods in this class for managing the queue so that events can fire and stuff doesn't break in the future.
+        /// </summary>
         public List<string> Queue
         {
             get
@@ -26,6 +33,9 @@ namespace FRESHMusicPlayer
         }
 
         private bool shuffle = false;
+        /// <summary>
+        /// Gets or sets whether the queue should be shuffled.
+        /// </summary>
         public bool Shuffle 
         {
             get => shuffle;
@@ -36,9 +46,17 @@ namespace FRESHMusicPlayer
                 else shuffledQueue = null;
             }
         }
+        /// <summary>
+        /// Gets or sets the current repeat mode.
+        /// </summary>
         public RepeatMode RepeatMode { get; set; } = RepeatMode.None;
+        /// <summary>
+        /// Gets the index in the queue of the track that the Player is going to play *next*.
+        /// </summary>
         public int Position { get; internal set; }
-
+        /// <summary>
+        /// Fired when the queue changes.
+        /// </summary>
         public event EventHandler QueueChanged;
 
         private List<string> queue = new List<string>();
@@ -46,6 +64,10 @@ namespace FRESHMusicPlayer
 
         private readonly Random rng = new Random();
 
+        /// <summary>
+        /// Adds a track to the queue.
+        /// </summary>
+        /// <param name="filePath">The track to add</param>
         public void Add(string filePath)
         {
             Queue.Add(filePath);
@@ -53,6 +75,10 @@ namespace FRESHMusicPlayer
                 ShuffleQueue();
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
+        /// <summary>
+        /// Adds multiple tracks to the queue.
+        /// </summary>
+        /// <param name="filePaths">The tracks to add.</param>
         public void Add(string[] filePaths)
         {
             Queue.AddRange(filePaths);
@@ -60,18 +86,28 @@ namespace FRESHMusicPlayer
                 ShuffleQueue();
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
+        /// <summary>
+        /// Clears the queue.
+        /// </summary>
         public void Clear()
         {
             Queue.Clear();
             Position = 0;
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
+        /// <summary>
+        /// Shuffles the queue. If <see cref="Shuffle"/> isn't true, this will not do anything.
+        /// </summary>
         public void ManualShuffle()
         {
             if (Shuffle)
                 ShuffleQueue();
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
+        /// <summary>
+        /// Removes a track from the queue.
+        /// </summary>
+        /// <param name="index">The index of the track you want to remove.</param>
         public void Remove(int index)
         {
             if (index <= (Position - 1)) Position--;
@@ -105,10 +141,22 @@ namespace FRESHMusicPlayer
             shuffledQueue = listtoreinsert;
         }
     }
+    /// <summary>
+    /// The way that the queue will be repeated
+    /// </summary>
     public enum RepeatMode
     {
+        /// <summary>
+        /// Do not repeat tracks in the queue
+        /// </summary>
         None,
+        /// <summary>
+        /// Repeat the currently playing track
+        /// </summary>
         RepeatOne,
+        /// <summary>
+        /// Repeat the entire queue
+        /// </summary>
         RepeatAll
     }
 }
