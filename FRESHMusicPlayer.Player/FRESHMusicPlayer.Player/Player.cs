@@ -12,14 +12,34 @@ namespace FRESHMusicPlayer
 {
     public class Player
     {
+        /// <summary>
+        /// The current backend the Player is using for audio playback
+        /// </summary>
         public IAudioBackend CurrentBackend { get; private set; }
-
+        /// <summary>
+        /// If true, suppresses an internal event handler. I honestly don't understand how this thing works; just make sure to keep
+        /// setting this to false, or things will explode.
+        /// </summary>
         public bool AvoidNextQueue { get; set; }
         public DiscordRpcClient Client { get; set; }
 
+        /// <summary>
+        /// The current volume, from 0 to 1.
+        /// </summary>
         public float CurrentVolume { get; set; } = 1;
+        /// <summary>
+        /// The current path the Player is playing. Keep in mind that this may not necessarily be a file. For example, it could be the
+        /// URL to a network stream.
+        /// </summary>
         public string FilePath { get; set; } = string.Empty;
-        public bool Playing { get; set; }
+        /// <summary>
+        /// Whether the audio backend and file has been loaded and things are ready to go. If you interact with the Player everything
+        /// will explode.
+        /// </summary>
+        public bool FileLoaded { get; set; }
+        /// <summary>
+        /// Whether the Player is paused.
+        /// </summary>
         public bool Paused { get; set; }
 
         public PlayQueue Queue { get; set; } = new PlayQueue();
@@ -28,7 +48,13 @@ namespace FRESHMusicPlayer
         /// Raised whenever a new track is being played.
         /// </summary>
         public event EventHandler SongChanged;
+        /// <summary>
+        /// Raised whenever the player is stopping.
+        /// </summary>
         public event EventHandler SongStopped;
+        /// <summary>
+        /// Raised whenever an exception is thrown while the Player is loading a file.
+        /// </summary>
         public event EventHandler<PlaybackExceptionEventArgs> SongException;
 
         #region CoreFMP
@@ -54,6 +80,12 @@ namespace FRESHMusicPlayer
 
             if (Queue.Position >= Queue.Queue.Count)
             {
+                if (Queue.RepeatMode == RepeatMode.RepeatAll) // Go back to the first track and play it again
+                {
+                    Queue.Position = 0;
+                    PlayMusic();
+                    return;
+                }
                 Queue.Clear();
                 StopMusic();
                 return;
@@ -96,12 +128,12 @@ namespace FRESHMusicPlayer
                 CurrentBackend.Volume = CurrentVolume;
                 CurrentBackend.OnPlaybackStopped += OnPlaybackStopped;
 
-                Playing = true;
+                FileLoaded = true;
             }
 
             try
             {
-                if (Playing != true)
+                if (FileLoaded != true)
                 {
                     PMusic();
                 }
@@ -152,12 +184,12 @@ namespace FRESHMusicPlayer
         /// </summary>
         public void StopMusic()
         {
-            if (!Playing) return;
+            if (!FileLoaded) return;
 
             CurrentBackend.Dispose();
             CurrentBackend = null;
 
-            Playing = false;
+            FileLoaded = false;
             Paused = false;
             SongStopped?.Invoke(null, EventArgs.Empty);
         }
