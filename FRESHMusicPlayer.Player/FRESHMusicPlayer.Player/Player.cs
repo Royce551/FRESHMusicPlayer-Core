@@ -171,34 +171,34 @@ namespace FRESHMusicPlayer
                 SongChanged?.Invoke(null,
                     EventArgs.Empty); // Now that playback has started without any issues, fire the song changed event.
             }
-            catch (FileNotFoundException)
-            {
-                var args = new PlaybackExceptionEventArgs {Details = "That's not a valid file path!"};
-                SongException?.Invoke(null, args);
-            }
-            catch (ArgumentException)
-            {
-                var args = new PlaybackExceptionEventArgs {Details = "That's not a valid file path!"};
-                SongException?.Invoke(null, args);
-            }
-            catch (System.Runtime.InteropServices.COMException)
-            {
-                var args = new PlaybackExceptionEventArgs {Details = "This isn't a valid audio file!"};
-                SongException?.Invoke(null, args);
-            }
-            catch (FormatException)
-            {
-                var args = new PlaybackExceptionEventArgs {Details = "This audio file might be corrupt!"};
-                SongException?.Invoke(null, args);
-            }
-            catch (InvalidOperationException)
-            {
-                var args = new PlaybackExceptionEventArgs {Details = "This audio file uses VBR \nor might be corrupt!"};
-                SongException?.Invoke(null, args);
-            }
+            //catch (FileNotFoundException) // TODO: move these to NAudioBackend
+            //{
+            //    var args = new PlaybackExceptionEventArgs {Details = "That's not a valid file path!"};
+            //    SongException?.Invoke(null, args);
+            //}
+            //catch (ArgumentException)
+            //{
+            //    var args = new PlaybackExceptionEventArgs {Details = "That's not a valid file path!"};
+            //    SongException?.Invoke(null, args);
+            //}
+            //catch (System.Runtime.InteropServices.COMException)
+            //{
+            //    var args = new PlaybackExceptionEventArgs {Details = "This isn't a valid audio file!"};
+            //    SongException?.Invoke(null, args);
+            //}
+            //catch (FormatException)
+            //{
+            //    var args = new PlaybackExceptionEventArgs {Details = "This audio file might be corrupt!"};
+            //    SongException?.Invoke(null, args);
+            //}
+            //catch (InvalidOperationException)
+            //{
+            //    var args = new PlaybackExceptionEventArgs {Details = "This audio file uses VBR \nor might be corrupt!"};
+            //    SongException?.Invoke(null, args);
+            //}
             catch (Exception e)
             {
-                var args = new PlaybackExceptionEventArgs {Details = $"{e.Message}\n{e.StackTrace}"};
+                var args = new PlaybackExceptionEventArgs(e, $"{e.Message}\n{e.StackTrace}");
                 SongException?.Invoke(null, args);
             }
         }
@@ -242,7 +242,7 @@ namespace FRESHMusicPlayer
 
         // Integration
 
-        //#region DiscordRPC
+        //#region DiscordRPC // TODO: move this to the frontend
         ///// <summary>
         ///// Initializes the Discord RPC client. Once it has been initialized, you can set the presence by using <see cref="UpdateRPC(string, string, string)"/>
         ///// </summary>

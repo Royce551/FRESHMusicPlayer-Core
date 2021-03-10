@@ -12,8 +12,6 @@ namespace FRESHMusicPlayer.Backends
         private static ContainerConfiguration config = new ContainerConfiguration();
         private static CompositionHost container;
 
-        private static List<string> directories = new List<string>();
-
         private static IEnumerable<Assembly> LoadAssemblies(IEnumerable<string> paths)
         {
             foreach (var file in paths)
