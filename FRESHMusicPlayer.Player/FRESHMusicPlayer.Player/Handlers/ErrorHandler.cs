@@ -8,6 +8,13 @@ namespace FRESHMusicPlayer.Handlers
 {
     public class PlaybackExceptionEventArgs : EventArgs
     {
-        public string Details { get; set; }
+        public Exception Exception { get; }
+        public string Details { get; }
+
+        public PlaybackExceptionEventArgs(Exception exception, string details)
+        {
+            Exception = exception;
+            Details = details;
+        }
     }
 }
