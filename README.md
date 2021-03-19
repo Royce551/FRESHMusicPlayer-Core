@@ -1,20 +1,24 @@
 banner goes here eventually
 # FRESHMusicPlayer-Core
-Music Player component for .NET apps - designed to be used for the FRESHMusicPlayer project but can be used on anything :)
+audio library abstraction library - designed to be used for the FRESHMusicPlayer project but can be used on anything :)
 - [**Support/Discussion Discord Server**](https://discord.gg/mFGFT8K)
 ## Features
 - Abstracts music playback into a simple API
-- Provides a library that's shared between all FMP Core based apps
-- Has built in support for integrations with services like Discord
+- todo: add more stuff here
 ## Usage
 ```
 using FRESHMusicPlayer;
 
-Player player = new Player();
+var player = new Player();
 string path = "Can be a file path, or a URL to a network stream";
-player.AddQueue(path);  // Everything in FMP runs on a queue
-player.PlayMusic();  // Play through the queue
+player.PlayMusic(path);  // Clear the queue, add the track to the queue, and play
+// or
+player.Queue.Add(path);
+player.PlayMusic(); // Plays through the queue
 ```
+### Platforms
+**Windows** - NAudio is required for audio playback   
+**Other platforms** - You'll need to include the [VLC audio plugin](https://github.com/DeclanHoare/FmpVlcBackend) in the output directory of your app for audio playback to work. The user will also need to have a global installation of VLC available. Hoping to replace this with something lighterweight in the future.
 [**Documentation (WIP)**]()
 ## Projects that use FMP Core
 - [**FRESHMusicPlayer**](https://github.com/royce551/freshmusicplayer)
