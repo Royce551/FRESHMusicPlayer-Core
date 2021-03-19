@@ -91,7 +91,7 @@ namespace FRESHMusicPlayer.Handlers
         {
             Database.GetCollection<DatabaseTrack>("tracks").DeleteMany(x => x.Path == path);
         }
-        public void Nuke(bool nukePlaylists = true)
+        public virtual void Nuke(bool nukePlaylists = true)
         {
             Database.GetCollection<DatabaseTrack>("tracks").DeleteAll();
             if (nukePlaylists) Database.GetCollection<DatabasePlaylist>("playlists").DeleteAll();

@@ -44,6 +44,7 @@ namespace FRESHMusicPlayer
                 shuffle = value;
                 if (shuffle) shuffledQueue = new List<string>(queue);
                 else shuffledQueue = null;
+                QueueChanged?.Invoke(null, EventArgs.Empty);
             }
         }
         /// <summary>
@@ -51,9 +52,9 @@ namespace FRESHMusicPlayer
         /// </summary>
         public RepeatMode RepeatMode { get; set; } = RepeatMode.None;
         /// <summary>
-        /// Gets the index in the queue of the track that the Player is going to play *next*.
+        /// Gets or sets the index in the queue of the track that the Player is going to play *next*.
         /// </summary>
-        public int Position { get; internal set; }
+        public int Position { get; set; }
         /// <summary>
         /// Fired when the queue changes.
         /// </summary>
@@ -70,9 +71,12 @@ namespace FRESHMusicPlayer
         /// <param name="filePath">The track to add</param>
         public void Add(string filePath)
         {
-            Queue.Add(filePath);
+            queue.Add(filePath);
             if (Shuffle)
+            {
+                shuffledQueue.Add(filePath);
                 ShuffleQueue();
+            }
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
         /// <summary>
@@ -81,9 +85,12 @@ namespace FRESHMusicPlayer
         /// <param name="filePaths">The tracks to add.</param>
         public void Add(string[] filePaths)
         {
-            Queue.AddRange(filePaths);
+            queue.AddRange(filePaths);
             if (Shuffle)
+            {
+                shuffledQueue.AddRange(filePaths);
                 ShuffleQueue();
+            }
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
         /// <summary>
@@ -91,7 +98,9 @@ namespace FRESHMusicPlayer
         /// </summary>
         public void Clear()
         {
-            Queue.Clear();
+            queue.Clear();
+            if (Shuffle)
+                shuffledQueue.Clear();
             Position = 0;
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
@@ -112,7 +121,9 @@ namespace FRESHMusicPlayer
         {
             if (index <= (Position - 1)) Position--;
             if (Position < 0) Position = 1;
-            Queue.RemoveAt(index);
+            queue.RemoveAt(index);
+            if (Shuffle)
+                shuffledQueue.RemoveAt(index);
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
 

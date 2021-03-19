@@ -39,7 +39,8 @@ namespace FRESHMusicPlayer
             set
             {
                 volume = value;
-                CurrentBackend.Volume = volume;
+                if (FileLoaded)
+                    CurrentBackend.Volume = volume;
             }
         }
         /// <summary>
