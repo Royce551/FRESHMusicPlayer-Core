@@ -33,7 +33,7 @@ namespace WinformsTest
 
         private void Player_songException(object sender, PlaybackExceptionEventArgs e)
         {
-            MessageBox.Show("something did a fucky wucky");
+            MessageBox.Show(e.Details);
         }
 
         private void Player_songStopped(object sender, EventArgs e)

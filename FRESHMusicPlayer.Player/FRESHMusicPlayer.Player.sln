@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GtkSharpTest", "GtkSharpTes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FmpCdLibBackend", "FmpCdLibBackend\FmpCdLibBackend.csproj", "{31D77A1D-F161-42E8-826E-3E27E6566B28}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FmpBassBackend", "FmpBassBackend\FmpBassBackend.csproj", "{73F98C4B-D1F8-431E-8906-4453B74A167D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{31D77A1D-F161-42E8-826E-3E27E6566B28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31D77A1D-F161-42E8-826E-3E27E6566B28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31D77A1D-F161-42E8-826E-3E27E6566B28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73F98C4B-D1F8-431E-8906-4453B74A167D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73F98C4B-D1F8-431E-8906-4453B74A167D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73F98C4B-D1F8-431E-8906-4453B74A167D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73F98C4B-D1F8-431E-8906-4453B74A167D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
