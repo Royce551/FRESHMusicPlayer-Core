@@ -94,50 +94,6 @@ namespace FmpBassBackend
         public event EventHandler MediaFailed;
         #endregion
 
-        #region Frequency
-        double _freq = 44100;
-
-        /// <summary>
-        /// Gets or Sets the Playback Frequency in Hertz.
-        /// Default is 44100 Hz.
-        /// </summary>
-        public double Frequency
-        {
-            get => _freq;
-            set
-            {
-                if (!Bass.ChannelSetAttribute(Handle, ChannelAttribute.Frequency, value))
-                    return;
-
-                _freq = value;
-                OnPropertyChanged();
-            }
-        }
-        #endregion
-
-        #region Balance
-        double _pan;
-
-        /// <summary>
-        /// Gets or Sets Balance (Panning) (-1 ... 0 ... 1).
-        /// -1 Represents Completely Left.
-        ///  1 Represents Completely Right.
-        /// Default is 0.
-        /// </summary>
-        public double Balance
-        {
-            get => _pan;
-            set
-            {
-                if (!Bass.ChannelSetAttribute(Handle, ChannelAttribute.Pan, value))
-                    return;
-
-                _pan = value;
-                OnPropertyChanged();
-            }
-        }
-        #endregion
-
         #region Device
         int _dev = -1;
 
@@ -182,76 +138,12 @@ namespace FmpBassBackend
         }
         #endregion
 
-        #region Loop
-        bool _loop;
-
-        /// <summary>
-        /// Gets or Sets whether the Playback is looped.
-        /// </summary>
-        public bool Loop
-        {
-            get => _loop;
-            set
-            {
-                if (value ? !Bass.ChannelAddFlag(Handle, BassFlags.Loop) : !Bass.ChannelRemoveFlag(Handle, BassFlags.Loop))
-                    return;
-
-                _loop = value;
-                OnPropertyChanged();
-            }
-        }
-        #endregion
-
         /// <summary>
         /// Override this method for custom loading procedure.
         /// </summary>
         /// <param name="FileName">Path to the File to Load.</param>
         /// <returns><see langword="true"/> on Success, <see langword="false"/> on failure</returns>
         protected virtual int OnLoad(string FileName) => Bass.CreateStream(FileName);
-
-        #region Tags
-        string _title = "", _artist = "", _album = "";
-
-        /// <summary>
-        /// Title of the Loaded Media.
-        /// </summary>
-        public string Title
-        {
-            get => _title;
-            private set
-            {
-                _title = value;
-                OnPropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Artist of the Loaded Media.
-        /// </summary>
-        public string Artist
-        {
-            get => _artist;
-            private set
-            {
-                _artist = value;
-                OnPropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Album of the Loaded Media.
-        /// </summary>
-        public string Album
-        {
-            get => _album;
-            private set
-            {
-                _album = value;
-                OnPropertyChanged();
-            }
-        }
-        #endregion
-
         /// <summary>
         /// Gets the Playback State of the Channel.
         /// </summary>
@@ -342,13 +234,6 @@ namespace FmpBassBackend
 
             Handle = h;
 
-            var tags = TagReader.Read(Handle);
-
-            Title = !string.IsNullOrWhiteSpace(tags.Title) ? tags.Title
-                                                           : Path.GetFileNameWithoutExtension(FileName);
-            Artist = tags.Artist;
-            Album = tags.Album;
-
             InitProperties();
 
             MediaLoaded?.Invoke(h);
@@ -381,10 +266,7 @@ namespace FmpBassBackend
         /// </summary>
         protected virtual void InitProperties()
         {
-            Frequency = _freq;
-            Balance = _pan;
             Volume = _vol;
-            Loop = _loop;
         }
 
         void OnStateChanged() => OnPropertyChanged(nameof(State));
