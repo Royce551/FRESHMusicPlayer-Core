@@ -48,22 +48,22 @@ namespace WinformsTest
 
         private void button1_Click(object sender, EventArgs e) // pause/resume
         {
-            if (player.Paused) player.ResumeMusic();
-            else player.PauseMusic();
+            if (player.Paused) player.Resume();
+            else player.Pause();
         }
 
         private void button2_Click(object sender, EventArgs e) // stop
         {
-            player.StopMusic();
+            player.Stop();
         }
 
-        private void button3_Click(object sender, EventArgs e) // play
+        private async void button3_Click(object sender, EventArgs e) // play
         {
             var openFileDialog1 = new OpenFileDialog();
             if (openFileDialog1.ShowDialog() != DialogResult.OK) return;
             player.Queue.Add(openFileDialog1.FileName);
-            player.PlayMusic();
-            player.Volume = 0.7f;
+            await player.PlayAsync();
+            player.Volume = 0.5f;
         }
 
         private void FreshMusicPlayer_Load(object sender, EventArgs e)
@@ -71,14 +71,14 @@ namespace WinformsTest
 
         }
 
-        private void button4_Click(object sender, EventArgs e) // next
+        private async void button4_Click(object sender, EventArgs e) // next
         {
-            player.NextSong();
+            await player.NextAsync();
         }
 
-        private void button5_Click(object sender, EventArgs e) // previous
+        private async void button5_Click(object sender, EventArgs e) // previous
         {
-            player.PreviousSong();
+            await player.PreviousAsync();
         }
 
         private void button6_Click(object sender, EventArgs e) // extra button 1

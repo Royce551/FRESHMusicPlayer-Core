@@ -46,8 +46,6 @@ namespace FRESHMusicPlayer.Backends
 
         public async Task<BackendLoadResult> LoadSongAsync(string file)
         {
-            if (!File.Exists(file)) return BackendLoadResult.Invalid;
-
             if (AudioFile != null) AudioFile.Dispose();
             try
             {
@@ -74,6 +72,11 @@ namespace FRESHMusicPlayer.Backends
             catch (InvalidOperationException)
             {
                 return BackendLoadResult.Invalid;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BackendLoadResult.UnknownError;
             }
             return BackendLoadResult.OK;
         }

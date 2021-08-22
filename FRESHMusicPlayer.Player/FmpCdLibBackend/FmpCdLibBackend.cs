@@ -22,6 +22,8 @@ namespace FmpCdLibBackend
 
         public float Volume { get => (float)player.Volume; set => player.Volume = value; }
 
+        public IMetadataProvider Metadata { get; private set; }
+
         public event EventHandler<EventArgs> OnPlaybackStopped;
 
         public FmpCdLibBackend()
@@ -46,24 +48,31 @@ namespace FmpCdLibBackend
            //player.Dispose();
         }
 
-        public void LoadSong(string file)
+        public async Task<BackendLoadResult> LoadSongAsync(string file)
         {
-            if (Path.GetExtension(file).ToUpper() != ".CDA") throw new Exception("Not a CD");
-            // super hacky; assumes that the path is something like D:\Track01.cda, might be a better way to do this
-            var driveLetter = char.Parse(file.Substring(0, 1));
-            var trackNumber = int.Parse(file.Substring(8, 2));
+            if (Path.GetExtension(file).ToUpper() != ".CDA") return BackendLoadResult.NotSupported;
 
-            var drives = player.GetDrives();
-            foreach (var drive in drives)
+            var result = BackendLoadResult.Invalid;
+            await Task.Run(() =>
             {
-                if (drive.DriveLetter == driveLetter)
+                // super hacky; assumes that the path is something like D:\Track01.cda, might be a better way to do this
+                var driveLetter = char.Parse(file.Substring(0, 1));
+                var trackNumber = int.Parse(file.Substring(8, 2));
+
+                var drives = player.GetDrives();
+                foreach (var drive in drives)
                 {
-                    var trackToPlay = drive.InsertedMedia.Tracks[trackNumber - 1];
-                    TotalTime = trackToPlay.Duration;
-                    player.PlayTrack(trackToPlay);
-                    return;
+                    if (drive.DriveLetter == driveLetter)
+                    {
+                        var trackToPlay = drive.InsertedMedia.Tracks[trackNumber - 1];
+                        TotalTime = trackToPlay.Duration;
+                        player.PlayTrack(trackToPlay);
+                        Metadata = new CDLibMetadataProvider(trackToPlay);
+                        result = BackendLoadResult.OK;
+                    }
                 }
-            }
+            });
+            return result;
         }
         
         public void Pause()

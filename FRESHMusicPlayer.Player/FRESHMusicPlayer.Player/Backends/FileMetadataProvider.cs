@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FRESHMusicPlayer.Backends
 {
@@ -29,6 +30,9 @@ namespace FRESHMusicPlayer.Backends
 
         public Track ATLTrack { get; set; }
 
-        public FileMetadataProvider(string path) => ATLTrack = new Track(path);
+        private string path;
+        public FileMetadataProvider(string path) => this.path = path;
+
+        public async Task LoadAsync() => await Task.Run(() => ATLTrack = new Track(path));
     }
 }
