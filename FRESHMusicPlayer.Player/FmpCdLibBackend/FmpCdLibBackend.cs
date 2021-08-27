@@ -53,25 +53,26 @@ namespace FmpCdLibBackend
             if (Path.GetExtension(file).ToUpper() != ".CDA") return BackendLoadResult.NotSupported;
 
             var result = BackendLoadResult.Invalid;
-            await Task.Run(() =>
-            {
-                // super hacky; assumes that the path is something like D:\Track01.cda, might be a better way to do this
-                var driveLetter = char.Parse(file.Substring(0, 1));
-                var trackNumber = int.Parse(file.Substring(8, 2));
 
-                var drives = player.GetDrives();
-                foreach (var drive in drives)
+            IAudioCDTrack trackToPlay = null;
+            // super hacky; assumes that the path is something like D:\Track01.cda, might be a better way to do this
+            var driveLetter = char.Parse(file.Substring(0, 1));
+            var trackNumber = int.Parse(file.Substring(8, 2));
+
+            var drives = player.GetDrives();
+            foreach (var drive in drives)
+            {
+                if (drive.DriveLetter == driveLetter)
                 {
-                    if (drive.DriveLetter == driveLetter)
-                    {
-                        var trackToPlay = drive.InsertedMedia.Tracks[trackNumber - 1];
-                        TotalTime = trackToPlay.Duration;
-                        player.PlayTrack(trackToPlay);
-                        Metadata = new CDLibMetadataProvider(trackToPlay);
-                        result = BackendLoadResult.OK;
-                    }
+                    trackToPlay = drive.InsertedMedia.Tracks[trackNumber - 1];
+                    TotalTime = trackToPlay.Duration;
+                    player.PlayTrack(trackToPlay);
+                        
+                    result = BackendLoadResult.OK;
                 }
-            });
+            }
+
+            if (trackToPlay != null) Metadata = new CDLibMetadataProvider(trackToPlay);
             return result;
         }
         

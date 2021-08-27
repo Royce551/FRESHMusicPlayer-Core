@@ -14,7 +14,7 @@ namespace FRESHMusicPlayer.Backends
 
         public string Album => ATLTrack.Album;
 
-        public byte[] CoverArt => ATLTrack.EmbeddedPictures[0].PictureData;
+        public byte[] CoverArt => ATLTrack.EmbeddedPictures.Count != 0 ? ATLTrack.EmbeddedPictures[0].PictureData : null;
 
         public string[] Genres => ATLTrack.Genre.Split(new char[] { Settings.DisplayValueSeparator, '/' });
 
@@ -30,9 +30,6 @@ namespace FRESHMusicPlayer.Backends
 
         public Track ATLTrack { get; set; }
 
-        private string path;
-        public FileMetadataProvider(string path) => this.path = path;
-
-        public async Task LoadAsync() => await Task.Run(() => ATLTrack = new Track(path));
+        public FileMetadataProvider(string path) => ATLTrack = new Track(path);
     }
 }

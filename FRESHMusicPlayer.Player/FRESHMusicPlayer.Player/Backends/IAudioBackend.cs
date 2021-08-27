@@ -34,8 +34,6 @@ namespace FRESHMusicPlayer.Backends
         int TrackTotal { get; }
         int DiscNumber { get; }
         int DiscTotal { get; }
-
-        Task LoadAsync();
     }
 
     public enum BackendLoadResult

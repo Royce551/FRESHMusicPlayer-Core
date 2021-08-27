@@ -18,7 +18,7 @@ namespace FmpCdLibBackend
 
         public byte[] CoverArt => null;
 
-        public string[] Genres => null;
+        public string[] Genres => Array.Empty<string>();
 
         public int Year => 0;
 
@@ -32,10 +32,5 @@ namespace FmpCdLibBackend
 
         private readonly IAudioCDTrack track;
         public CDLibMetadataProvider(IAudioCDTrack track) => this.track = track;
-
-        public Task LoadAsync()
-        {
-            return Task.CompletedTask; 
-        }
     }
 }

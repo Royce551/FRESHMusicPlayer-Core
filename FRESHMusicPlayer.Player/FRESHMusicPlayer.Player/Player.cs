@@ -131,7 +131,7 @@ namespace FRESHMusicPlayer
         /// Plays a track. This is equivalent to calling Queue.Add() and then PlayMusic()./>
         /// </summary>
         /// <param name="path">The track to play</param>
-        public async Task PlayMusicAsync(string path)
+        public async Task PlayAsync(string path)
         {
             Queue.Add(path);
             await PlayAsync();
