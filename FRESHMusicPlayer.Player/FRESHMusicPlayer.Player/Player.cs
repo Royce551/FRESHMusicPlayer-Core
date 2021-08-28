@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using FRESHMusicPlayer.Handlers;
-using FRESHMusicPlayer.Utilities;
 using FRESHMusicPlayer.Backends;
 using System.Threading.Tasks;
 

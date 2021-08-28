@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FRESHMusicPlayer.Handlers
+namespace FRESHMusicPlayer
 {
     public class PlaybackExceptionEventArgs : EventArgs
     {
