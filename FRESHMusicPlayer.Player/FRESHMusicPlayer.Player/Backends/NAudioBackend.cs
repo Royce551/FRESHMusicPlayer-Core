@@ -73,11 +73,6 @@ namespace FRESHMusicPlayer.Backends
             {
                 return BackendLoadResult.Invalid;
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return BackendLoadResult.UnknownError;
-            }
             return BackendLoadResult.OK;
         }
 

@@ -53,14 +53,25 @@ namespace FRESHMusicPlayer.Backends
 
         public static async Task<IAudioBackend> CreateBackendAsync(string filename)
         {
-            var problems = new List<BackendLoadResult>();
+            var problems = new List<(BackendLoadResult, Exception)>();
             foreach (var lazybackend in container.GetExports<Lazy<IAudioBackend>>())
             {
                 IAudioBackend backend = lazybackend.Value;
-                var result = await backend.LoadSongAsync(filename);
-
-                if (result != BackendLoadResult.OK) problems.Add(result);
-                else return backend;
+                try
+                {
+                    var result = await backend.LoadSongAsync(filename);
+                    if (result != BackendLoadResult.OK)
+                    {
+                        problems.Add((result, null));
+                        backend.Dispose();
+                    }
+                    else return backend;
+                }
+                catch (Exception e)
+                {
+                    problems.Add((BackendLoadResult.UnknownError, e));
+                    backend.Dispose();
+                }
             }
             throw new Exception($"A backend couldn't be found to load this file\n{string.Join("\n", problems)}");
         }
