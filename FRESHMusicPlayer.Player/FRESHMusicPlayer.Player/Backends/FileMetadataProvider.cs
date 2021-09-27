@@ -9,14 +9,14 @@ namespace FRESHMusicPlayer.Backends
     public class FileMetadataProvider : IMetadataProvider
     {
         public string Title => ATLTrack.Title;
-                                                                                                    // for mp3s, ATL still uses /
-        public string[] Artists => ATLTrack.Artist.Split(new char[] { Settings.DisplayValueSeparator, '/' });
+                                                        // for mp3s, ATL still uses /
+        public string[] Artists => ATLTrack.Artist.Split(Settings.DisplayValueSeparator, '/');
 
         public string Album => ATLTrack.Album;
 
         public byte[] CoverArt => ATLTrack.EmbeddedPictures.Count != 0 ? ATLTrack.EmbeddedPictures[0].PictureData : null;
 
-        public string[] Genres => ATLTrack.Genre.Split(new char[] { Settings.DisplayValueSeparator, '/' });
+        public string[] Genres => ATLTrack.Genre.Split(Settings.DisplayValueSeparator, '/');
 
         public int Year => ATLTrack.Year;
 
