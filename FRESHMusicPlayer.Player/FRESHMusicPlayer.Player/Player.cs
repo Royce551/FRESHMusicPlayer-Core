@@ -42,6 +42,8 @@ namespace FRESHMusicPlayer
                     CurrentBackend.Volume = volume;
             }
         }
+
+        public bool IsLoading { get; private set; } = false;
         /// <summary>
         /// The current path the Player is playing. Keep in mind that this may not necessarily be a file. For example, it could be the
         /// URL to a network stream.
@@ -59,6 +61,7 @@ namespace FRESHMusicPlayer
 
         public PlayQueue Queue { get; set; } = new PlayQueue();
 
+        public event EventHandler SongLoading;
         /// <summary>
         /// Raised whenever a new track is being played.
         /// </summary>
@@ -140,6 +143,10 @@ namespace FRESHMusicPlayer
         /// <param name="repeat">If true, avoids dequeuing the next track. Not to be used for anything other than the player.</param>
         public async Task PlayAsync(bool repeat = false)
         {
+            if (IsLoading) return;
+            IsLoading = true;
+            SongLoading?.Invoke(null, EventArgs.Empty);
+
             if (!repeat && Queue.Queue.Count != 0)
                 FilePath = Queue.Queue[Queue.Position];
             Queue.Position++;
@@ -174,6 +181,10 @@ namespace FRESHMusicPlayer
             {
                 var args = new PlaybackExceptionEventArgs(e, $"{e.Message}\n{e.StackTrace}");
                 SongException?.Invoke(null, args);
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 
