@@ -120,15 +120,6 @@ namespace FRESHMusicPlayer
         }
 
         /// <summary>
-        /// Repositions the playback position of the player.
-        /// </summary>
-        /// <param name="seconds">The position in to the track to skip in, in seconds.</param>
-        public void RepositionMusic(int seconds)
-        {
-            CurrentBackend.CurrentTime = TimeSpan.FromSeconds(seconds);
-        }
-
-        /// <summary>
         /// Plays a track. This is equivalent to calling Queue.Add() and then PlayMusic()./>
         /// </summary>
         /// <param name="path">The track to play</param>

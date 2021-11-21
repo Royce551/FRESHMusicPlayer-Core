@@ -22,8 +22,6 @@ namespace FmpCdLibBackend
 
         public float Volume { get => (float)player.Volume; set => player.Volume = value; }
 
-        public IMetadataProvider Metadata { get; private set; }
-
         public event EventHandler<EventArgs> OnPlaybackStopped;
 
         public FmpCdLibBackend()
@@ -71,11 +69,26 @@ namespace FmpCdLibBackend
                     result = BackendLoadResult.OK;
                 }
             }
-
-            if (trackToPlay != null) Metadata = new CDLibMetadataProvider(trackToPlay);
             return result;
         }
         
+        public async Task<IMetadataProvider> LoadMetadataAsync(string file)
+        {
+            if (Path.GetExtension(file).ToUpper() != ".CDA") return null;
+
+            IAudioCDTrack trackToPlay = null;
+            // super hacky; assumes that the path is something like D:\Track01.cda, might be a better way to do this
+            var driveLetter = char.Parse(file.Substring(0, 1));
+            var trackNumber = int.Parse(file.Substring(8, 2));
+
+            var drives = player.GetDrives();
+            foreach (var drive in drives)
+            {
+                if (drive.DriveLetter == driveLetter) trackToPlay = drive.InsertedMedia.Tracks[trackNumber - 1];
+            }
+            return new CDLibMetadataProvider(trackToPlay);
+        }
+
         public void Pause()
         {
             player.Pause();
