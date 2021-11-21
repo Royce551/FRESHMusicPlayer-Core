@@ -30,6 +30,8 @@ namespace FRESHMusicPlayer.Backends
         }
         public TimeSpan TotalTime => AudioFile.TotalTime;
 
+        public IMetadataProvider Metadata { get; private set; }
+
         public NAudioBackend()
         {
             if (OutputDevice is null)
@@ -51,6 +53,8 @@ namespace FRESHMusicPlayer.Backends
                 {
                     AudioFile = new AudioFileReader(file);
                     OutputDevice.Init(AudioFile);
+
+                    Metadata = new FileMetadataProvider(file);
                 });
             }
             catch (ArgumentException)
@@ -71,8 +75,6 @@ namespace FRESHMusicPlayer.Backends
             }
             return BackendLoadResult.OK;
         }
-
-        public async Task<IMetadataProvider> LoadMetadataAsync(string file) => await Task.Run(() => new FileMetadataProvider(file));
 
         public void Play()
         {
