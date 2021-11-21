@@ -21,6 +21,8 @@ namespace FmpBassBackend
 
         public event EventHandler<EventArgs> OnPlaybackStopped;
 
+        public IMetadataProvider Metadata { get; private set; }
+
         private readonly MediaPlayer player = new MediaPlayer();
 
         public FmpBassBackend()
@@ -41,11 +43,11 @@ namespace FmpBassBackend
         {
             var wasSuccessful = await player.LoadAsync(file);
 
+            Metadata = new FileMetadataProvider(file);
+
             if (!wasSuccessful) return BackendLoadResult.Invalid;
             else return BackendLoadResult.OK;
         }
-
-        public async Task<IMetadataProvider> LoadMetadataAsync(string file) => await Task.Run(() => new FileMetadataProvider(file));
 
         public void Pause() => player.Pause();
 

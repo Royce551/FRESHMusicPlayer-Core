@@ -9,13 +9,13 @@ namespace FRESHMusicPlayer.Backends
     public interface IAudioBackend : IDisposable
     {
         Task<BackendLoadResult> LoadSongAsync(string file);
-        Task<IMetadataProvider> LoadMetadataAsync(string file);
-
         void Play();
         void Pause();
 
         TimeSpan CurrentTime { get; set; }
         TimeSpan TotalTime { get; }
+
+        IMetadataProvider Metadata { get; }
 
         float Volume { get; set; }
 
