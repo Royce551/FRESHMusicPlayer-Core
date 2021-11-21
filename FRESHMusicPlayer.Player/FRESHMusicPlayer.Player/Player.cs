@@ -14,6 +14,7 @@ namespace FRESHMusicPlayer
         /// The current backend the Player is using for audio playback
         /// </summary>
         public IAudioBackend CurrentBackend { get; private set; }
+        public IMetadataProvider Metadata { get; private set; }
         /// <summary>
         /// The current playback position./>
         /// </summary>
@@ -132,7 +133,7 @@ namespace FRESHMusicPlayer
         /// Starts playing the Queue. In order to play a track, you must first add it to the Queue using <see cref="AddQueue(string)"/>.
         /// </summary>
         /// <param name="repeat">If true, avoids dequeuing the next track. Not to be used for anything other than the player.</param>
-        public async Task PlayAsync(bool repeat = false)
+        public async Task PlayAsync(bool repeat = false, bool loadMetadata = true)
         {
             if (IsLoading) return;
             IsLoading = true;
@@ -150,6 +151,8 @@ namespace FRESHMusicPlayer
                 CurrentBackend.OnPlaybackStopped += OnPlaybackStopped;
 
                 FileLoaded = true;
+
+                if (loadMetadata) Metadata = await CurrentBackend.GetMetadataAsync(FilePath);
             }
 
             try

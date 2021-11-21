@@ -45,7 +45,7 @@ namespace FmpBassBackend
             else return BackendLoadResult.OK;
         }
 
-        public async Task<IMetadataProvider> LoadMetadataAsync(string file) => await Task.Run(() => new FileMetadataProvider(file));
+        public async Task<IMetadataProvider> GetMetadataAsync(string file) => await Task.Run(() => new FileMetadataProvider(file));
 
         public void Pause() => player.Pause();
 

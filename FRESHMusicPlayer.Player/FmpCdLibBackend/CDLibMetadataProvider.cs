@@ -30,6 +30,8 @@ namespace FmpCdLibBackend
 
         public int DiscTotal => 0;
 
+        public int Length => (int)Math.Round(track.Duration.TotalSeconds);
+
         private readonly IAudioCDTrack track;
         public CDLibMetadataProvider(IAudioCDTrack track) => this.track = track;
     }

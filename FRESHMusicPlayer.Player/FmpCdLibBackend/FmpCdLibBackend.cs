@@ -72,7 +72,7 @@ namespace FmpCdLibBackend
             return result;
         }
         
-        public async Task<IMetadataProvider> LoadMetadataAsync(string file)
+        public async Task<IMetadataProvider> GetMetadataAsync(string file)
         {
             if (Path.GetExtension(file).ToUpper() != ".CDA") return null;
 

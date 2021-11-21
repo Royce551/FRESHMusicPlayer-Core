@@ -9,8 +9,7 @@ namespace FRESHMusicPlayer.Backends
     public interface IAudioBackend : IDisposable
     {
         Task<BackendLoadResult> LoadSongAsync(string file);
-        Task<IMetadataProvider> LoadMetadataAsync(string file);
-
+        Task<IMetadataProvider> GetMetadataAsync(string file);
         void Play();
         void Pause();
 
@@ -34,6 +33,7 @@ namespace FRESHMusicPlayer.Backends
         int TrackTotal { get; }
         int DiscNumber { get; }
         int DiscTotal { get; }
+        int Length { get; }
     }
 
     public enum BackendLoadResult

@@ -1,4 +1,5 @@
 ﻿using ATL;
+using FRESHMusicPlayer.Backends;
 using LiteDB;
 using System;
 using System.Collections.Generic;
@@ -102,8 +103,9 @@ namespace FRESHMusicPlayer
             if (dbTrack != null) return dbTrack;
             else
             {
-                var track = new Track(path);
-                return new DatabaseTrack { Artist = track.Artist, Title = track.Title, Album = track.Album, Length = track.Duration, Path = path, TrackNumber = track.TrackNumber };
+                var backend = AudioBackendFactory.CreateBackendAsync(path).Result; // doing async over sync here isn't that great
+                var track = backend.GetMetadataAsync(path).Result;                 // but it's likely that the frontend will task.run this anyway
+                return new DatabaseTrack { Artist = string.Join(", ", track.Artists), Title = track.Title, Album = track.Album, Length = track.Length, Path = path, TrackNumber = track.TrackNumber };
             }
         }
     }
