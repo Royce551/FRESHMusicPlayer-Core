@@ -81,8 +81,8 @@ namespace FRESHMusicPlayer.Backends
 
         public void Dispose()
         {
-            OutputDevice.Dispose();
-            AudioFile.Dispose();
+            OutputDevice?.Dispose();
+            AudioFile?.Dispose();
         }
 
         public void Pause()

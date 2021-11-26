@@ -51,7 +51,7 @@ namespace FRESHMusicPlayer.Backends
             container = config.CreateContainer();
         }
 
-        public static async Task<IAudioBackend> CreateBackendAsync(string filename)
+        public static async Task<IAudioBackend> CreateAndLoadBackendAsync(string filename)
         {
             var problems = new List<(BackendLoadResult, Exception)>();
             foreach (var lazybackend in container.GetExports<Lazy<IAudioBackend>>())

@@ -35,7 +35,7 @@ namespace FmpBassBackend
 
         private void Player_MediaEnded(object sender, EventArgs e) => OnPlaybackStopped?.Invoke(null, EventArgs.Empty);
 
-        public void Dispose() => player.Dispose();
+        public void Dispose() => player?.Dispose();
 
         public async Task<BackendLoadResult> LoadSongAsync(string file)
         {

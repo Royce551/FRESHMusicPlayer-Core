@@ -24,6 +24,9 @@ namespace FmpCdLibBackend
 
         public event EventHandler<EventArgs> OnPlaybackStopped;
 
+        private bool hasPlaybackStarted = false;
+        private IAudioCDTrack trackToPlay;
+
         public FmpCdLibBackend()
         {
             player = AudioCDPlayer.GetPlayer();
@@ -52,7 +55,6 @@ namespace FmpCdLibBackend
 
             var result = BackendLoadResult.Invalid;
 
-            IAudioCDTrack trackToPlay = null;
             // super hacky; assumes that the path is something like D:\Track01.cda, might be a better way to do this
             var driveLetter = char.Parse(file.Substring(0, 1));
             var trackNumber = int.Parse(file.Substring(8, 2));
@@ -64,7 +66,6 @@ namespace FmpCdLibBackend
                 {
                     trackToPlay = drive.InsertedMedia.Tracks[trackNumber - 1];
                     TotalTime = trackToPlay.Duration;
-                    player.PlayTrack(trackToPlay);
                         
                     result = BackendLoadResult.OK;
                 }
@@ -96,6 +97,11 @@ namespace FmpCdLibBackend
 
         public void Play()
         {
+            if (!hasPlaybackStarted)
+            {
+                player.PlayTrack(trackToPlay);
+                hasPlaybackStarted = true;
+            }
             player.Resume();
         }
         [DllImport("kernel32")]

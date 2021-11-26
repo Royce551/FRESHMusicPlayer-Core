@@ -144,7 +144,7 @@ namespace FRESHMusicPlayer
             Queue.Position++;
             async Task PMusic()
             {
-                CurrentBackend = await AudioBackendFactory.CreateBackendAsync(FilePath);
+                CurrentBackend = await AudioBackendFactory.CreateAndLoadBackendAsync(FilePath);
 
                 CurrentBackend.Play();
                 CurrentBackend.Volume = Volume;
