@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace FmpBassBackend
 {
@@ -20,7 +21,7 @@ namespace FmpBassBackend
 
         public event EventHandler<EventArgs> OnPlaybackStopped;
 
-        private readonly FMPMediaPlayer player = new FMPMediaPlayer();
+        private readonly MediaPlayer player = new MediaPlayer();
 
         public FmpBassBackend()
         {
@@ -28,18 +29,23 @@ namespace FmpBassBackend
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // on windows media foundation already provides flac support,
             {                                                         // don't bother
                 var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                Bass.PluginLoad(Path.Combine(currentDirectory, GetExtensionForCurrentPlatform("libbassflac")));
+                Bass.PluginLoad(Path.Combine(currentDirectory, GetExtensionForCurrentPlatform("bassflac")));
             }
         }
 
         private void Player_MediaEnded(object sender, EventArgs e) => OnPlaybackStopped?.Invoke(null, EventArgs.Empty);
 
-        public void Dispose() => player.Dispose();
+        public void Dispose() => player?.Dispose();
 
-        public void LoadSong(string file)
+        public async Task<BackendLoadResult> LoadSongAsync(string file)
         {
-            if (!player.Load(file)) throw new Exception("loading didn't work :("); // not awaited because fmpcore currently does not support await like this
+            var wasSuccessful = await player.LoadAsync(file);
+
+            if (!wasSuccessful) return BackendLoadResult.Invalid;
+            else return BackendLoadResult.OK;
         }
+
+        public async Task<IMetadataProvider> GetMetadataAsync(string file) => await Task.Run(() => new FileMetadataProvider(file));
 
         public void Pause() => player.Pause();
 
@@ -47,8 +53,8 @@ namespace FmpBassBackend
 
         private string GetExtensionForCurrentPlatform(string name)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return $"{name}.so";
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return $"{name}.dylib";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return $"lib{name}.so";
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return $"lib{name}.dylib";
             else return $"{name}.dll";
         }
     }

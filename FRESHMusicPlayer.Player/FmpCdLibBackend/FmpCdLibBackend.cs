@@ -24,6 +24,9 @@ namespace FmpCdLibBackend
 
         public event EventHandler<EventArgs> OnPlaybackStopped;
 
+        private bool hasPlaybackStarted = false;
+        private IAudioCDTrack trackToPlay;
+
         public FmpCdLibBackend()
         {
             player = AudioCDPlayer.GetPlayer();
@@ -46,9 +49,12 @@ namespace FmpCdLibBackend
            //player.Dispose();
         }
 
-        public void LoadSong(string file)
+        public async Task<BackendLoadResult> LoadSongAsync(string file)
         {
-            if (Path.GetExtension(file).ToUpper() != ".CDA") throw new Exception("Not a CD");
+            if (Path.GetExtension(file).ToUpper() != ".CDA") return BackendLoadResult.NotSupported;
+
+            var result = BackendLoadResult.Invalid;
+
             // super hacky; assumes that the path is something like D:\Track01.cda, might be a better way to do this
             var driveLetter = char.Parse(file.Substring(0, 1));
             var trackNumber = int.Parse(file.Substring(8, 2));
@@ -58,14 +64,32 @@ namespace FmpCdLibBackend
             {
                 if (drive.DriveLetter == driveLetter)
                 {
-                    var trackToPlay = drive.InsertedMedia.Tracks[trackNumber - 1];
+                    trackToPlay = drive.InsertedMedia.Tracks[trackNumber - 1];
                     TotalTime = trackToPlay.Duration;
-                    player.PlayTrack(trackToPlay);
-                    return;
+                        
+                    result = BackendLoadResult.OK;
                 }
             }
+            return result;
         }
         
+        public async Task<IMetadataProvider> GetMetadataAsync(string file)
+        {
+            if (Path.GetExtension(file).ToUpper() != ".CDA") return null;
+
+            IAudioCDTrack trackToPlay = null;
+            // super hacky; assumes that the path is something like D:\Track01.cda, might be a better way to do this
+            var driveLetter = char.Parse(file.Substring(0, 1));
+            var trackNumber = int.Parse(file.Substring(8, 2));
+
+            var drives = player.GetDrives();
+            foreach (var drive in drives)
+            {
+                if (drive.DriveLetter == driveLetter) trackToPlay = drive.InsertedMedia.Tracks[trackNumber - 1];
+            }
+            return new CDLibMetadataProvider(trackToPlay);
+        }
+
         public void Pause()
         {
             player.Pause();
@@ -73,6 +97,11 @@ namespace FmpCdLibBackend
 
         public void Play()
         {
+            if (!hasPlaybackStarted)
+            {
+                player.PlayTrack(trackToPlay);
+                hasPlaybackStarted = true;
+            }
             player.Resume();
         }
         [DllImport("kernel32")]

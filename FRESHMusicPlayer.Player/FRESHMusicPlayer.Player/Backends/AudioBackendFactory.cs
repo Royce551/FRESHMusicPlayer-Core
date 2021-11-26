@@ -4,13 +4,14 @@ using System.Composition.Hosting;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace FRESHMusicPlayer.Backends
 {
     static class AudioBackendFactory
     {
-        private static ContainerConfiguration config = new ContainerConfiguration();
-        private static CompositionHost container;
+        private readonly static ContainerConfiguration config = new ContainerConfiguration();
+        private readonly static CompositionHost container;
 
         private static IEnumerable<Assembly> LoadAssemblies(IEnumerable<string> paths)
         {
@@ -37,25 +38,9 @@ namespace FRESHMusicPlayer.Backends
 
         private static void AddDirectory(string path)
         {
-            //AppDomain.CurrentDomain.AppendPrivatePath(path);
-            try
-            {
-                config.WithAssemblies(LoadAssemblies(Directory.GetFiles(path, "*.dll")));
-            }
-            catch (DirectoryNotFoundException)
-            {
-                try
-                {
-                    Directory.CreateDirectory(path);
-                }
-                catch
-                {
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex);
-            }
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+ 
+            config.WithAssemblies(LoadAssemblies(Directory.GetFiles(path, "*.dll")));
         }
 
         static AudioBackendFactory()
@@ -66,31 +51,29 @@ namespace FRESHMusicPlayer.Backends
             container = config.CreateContainer();
         }
 
-        public static IAudioBackend CreateBackend(string filename)
+        public static async Task<IAudioBackend> CreateAndLoadBackendAsync(string filename)
         {
-            var exlist = new List<Exception>();
+            var problems = new List<(BackendLoadResult, Exception)>();
             foreach (var lazybackend in container.GetExports<Lazy<IAudioBackend>>())
             {
-                IAudioBackend backend = null;
+                IAudioBackend backend = lazybackend.Value;
                 try
                 {
-                    backend = lazybackend.Value;
-                    backend.LoadSong(filename);
-                    return backend;
-                }
-                catch (Exception ex)
-                {
-                    try
+                    var result = await backend.LoadSongAsync(filename);
+                    if (result != BackendLoadResult.OK)
                     {
+                        problems.Add((result, null));
                         backend.Dispose();
                     }
-                    catch
-                    {
-                    }
-                    exlist.Add(ex);
+                    else return backend;
+                }
+                catch (Exception e)
+                {
+                    problems.Add((BackendLoadResult.UnknownError, e));
+                    backend.Dispose();
                 }
             }
-            throw new Exception($"No backend could be found to play {filename}.\n\n{String.Join("\n\n", exlist)}\n");
+            throw new Exception($"A backend couldn't be found to load this file\n{string.Join("\n", problems)}");
         }
     }
 }

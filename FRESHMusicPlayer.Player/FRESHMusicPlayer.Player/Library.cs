@@ -1,11 +1,12 @@
 ﻿using ATL;
+using FRESHMusicPlayer.Backends;
 using LiteDB;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace FRESHMusicPlayer.Handlers
+namespace FRESHMusicPlayer
 {
     public class Library
     {
@@ -25,7 +26,7 @@ namespace FRESHMusicPlayer.Handlers
             foreach (string path in x.Tracks) z.Add(GetFallbackTrack(path));
             return z;
         }
-        public void AddTrackToPlaylist(string playlist, string path)
+        public virtual void AddTrackToPlaylist(string playlist, string path)
         {
             var x = Database.GetCollection<DatabasePlaylist>("playlists").FindOne(y => y.Name == playlist);
             if (Database.GetCollection<DatabasePlaylist>("playlists").FindOne(y => y.Name == playlist) is null)
@@ -39,13 +40,13 @@ namespace FRESHMusicPlayer.Handlers
                 Database.GetCollection<DatabasePlaylist>("playlists").Update(x);
             }
         }
-        public void RemoveTrackFromPlaylist(string playlist, string path)
+        public virtual void RemoveTrackFromPlaylist(string playlist, string path)
         {
             var x = Database.GetCollection<DatabasePlaylist>("playlists").FindOne(y => y.Name == playlist);
             x.Tracks.Remove(path);
             Database.GetCollection<DatabasePlaylist>("playlists").Update(x);
         }
-        public DatabasePlaylist CreatePlaylist(string playlist, string path = null)
+        public virtual DatabasePlaylist CreatePlaylist(string playlist, string path = null)
         {
             var newplaylist = new DatabasePlaylist
             {
@@ -58,8 +59,8 @@ namespace FRESHMusicPlayer.Handlers
             Database.GetCollection<DatabasePlaylist>("playlists").Insert(newplaylist);
             return newplaylist;
         }
-        public void DeletePlaylist(string playlist) => Database.GetCollection<DatabasePlaylist>("playlists").DeleteMany(x => x.Name == playlist);
-        public void Import(string[] tracks)
+        public virtual void DeletePlaylist(string playlist) => Database.GetCollection<DatabasePlaylist>("playlists").DeleteMany(x => x.Name == playlist);
+        public virtual void Import(string[] tracks)
         {
             var stufftoinsert = new List<DatabaseTrack>();
             int count = 0;
@@ -71,7 +72,7 @@ namespace FRESHMusicPlayer.Handlers
             }
             Database.GetCollection<DatabaseTrack>("tracks").InsertBulk(stufftoinsert);
         }
-        public void Import(List<string> tracks)
+        public virtual void Import(List<string> tracks)
         {
             var stufftoinsert = new List<DatabaseTrack>();
             foreach (string y in tracks)
@@ -81,13 +82,13 @@ namespace FRESHMusicPlayer.Handlers
             }
             Database.GetCollection<DatabaseTrack>("tracks").InsertBulk(stufftoinsert);
         }
-        public void Import(string path)
+        public virtual void Import(string path)
         {
             var track = new Track(path);
             Database.GetCollection<DatabaseTrack>("tracks")
                                 .Insert(new DatabaseTrack { Title = track.Title, Artist = track.Artist, Album = track.Album, Path = track.Path, TrackNumber = track.TrackNumber, Length = track.Duration });
         }
-        public void Remove(string path)
+        public virtual void Remove(string path)
         {
             Database.GetCollection<DatabaseTrack>("tracks").DeleteMany(x => x.Path == path);
         }
@@ -102,8 +103,18 @@ namespace FRESHMusicPlayer.Handlers
             if (dbTrack != null) return dbTrack;
             else
             {
-                var track = new Track(path);
-                return new DatabaseTrack { Artist = track.Artist, Title = track.Title, Album = track.Album, Length = track.Duration, Path = path, TrackNumber = track.TrackNumber };
+                try
+                {
+                    var backend = AudioBackendFactory.CreateAndLoadBackendAsync(path).Result; // doing async over sync here isn't that great
+                    var track = backend.GetMetadataAsync(path).Result;                 // but it's likely that the frontend will task.run this anyway
+                    if (track != null) return new DatabaseTrack { Artist = string.Join(", ", track.Artists), Title = track.Title, Album = track.Album, Length = track.Length, Path = path, TrackNumber = track.TrackNumber };
+                }
+                catch
+                {
+                    // ignored (for now)
+                }
+                var atlTrack = new Track(path);
+                return new DatabaseTrack { Artist = atlTrack.Artist, Title = atlTrack.Title, Album = atlTrack.Album, TrackNumber = atlTrack.TrackNumber, Length = atlTrack.Duration };
             }
         }
     }

@@ -8,7 +8,8 @@ namespace FRESHMusicPlayer.Backends
 {
     public interface IAudioBackend : IDisposable
     {
-        void LoadSong(string file);
+        Task<BackendLoadResult> LoadSongAsync(string file);
+        Task<IMetadataProvider> GetMetadataAsync(string file);
         void Play();
         void Pause();
 
@@ -18,5 +19,29 @@ namespace FRESHMusicPlayer.Backends
         float Volume { get; set; }
 
         event EventHandler<EventArgs> OnPlaybackStopped;
+    }
+
+    public interface IMetadataProvider
+    {
+        string Title { get; }
+        string[] Artists { get; }
+        string Album { get; }
+        byte[] CoverArt { get; }
+        string[] Genres { get; }
+        int Year { get; }
+        int TrackNumber { get; }
+        int TrackTotal { get; }
+        int DiscNumber { get; }
+        int DiscTotal { get; }
+        int Length { get; }
+    }
+
+    public enum BackendLoadResult
+    {
+        OK,
+        NotSupported,
+        Invalid,
+        Corrupt,
+        UnknownError
     }
 }
