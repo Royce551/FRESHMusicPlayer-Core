@@ -7,11 +7,14 @@
     <PackageTags>audio music-player</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageProjectUrl></PackageProjectUrl>
-	  <PackageVersion>4.0.0</PackageVersion>  
+	  <PackageVersion>4.0.1</PackageVersion>  
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release+Package|AnyCPU' ">
     <Optimize>true</Optimize>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>C:\Users\poohw\OneDrive\Desktop\stuff on desktop\Squid Repositories\FRESHMusicPlayer-Core\FRESHMusicPlayer.Player\FRESHMusicPlayer.Player\FRESHMusicPlayer.Core.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="LiteDB" Version="5.0.9" />
