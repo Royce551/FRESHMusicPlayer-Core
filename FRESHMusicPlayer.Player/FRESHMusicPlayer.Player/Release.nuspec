@@ -3,7 +3,7 @@
   <metadata>
     <id>FRESHMusicPlayerCore</id>
     <!-- version will be replaced by MSBuild -->
-    <version>0.0.0.0</version>
+    <version>4.0.0.0</version>
     <title>FRESHMusicPlayer-Core</title>
     <authors>Squid Grill</authors>
     <description>Music player component for GUI Windows applications</description>

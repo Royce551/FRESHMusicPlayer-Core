@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Squid Grill")]
 [assembly: AssemblyProduct("FRESHMusicPlayer.Player")]
-[assembly: AssemblyCopyright("Copyright © 2021")]
+[assembly: AssemblyCopyright("Copyright © 2021 Squid Grill")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
