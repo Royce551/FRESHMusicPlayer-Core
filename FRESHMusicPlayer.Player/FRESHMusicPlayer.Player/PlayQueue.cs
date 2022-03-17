@@ -42,7 +42,11 @@ namespace FRESHMusicPlayer
             set
             {
                 shuffle = value;
-                if (shuffle) shuffledQueue = new List<string>(queue);
+                if (shuffle)
+                {
+                    shuffledQueue = new List<string>(queue);
+                    ShuffleQueue();
+                }
                 else shuffledQueue = null;
                 QueueChanged?.Invoke(null, EventArgs.Empty);
             }
