@@ -6,11 +6,25 @@ using System.Threading.Tasks;
 
 namespace FRESHMusicPlayer
 {
+    /// <summary>
+    /// Playback exception args
+    /// </summary>
     public class PlaybackExceptionEventArgs : EventArgs
     {
+        /// <summary>
+        /// The actual exception
+        /// </summary>
         public Exception Exception { get; }
+        /// <summary>
+        /// A nicely formatted version of the exception for display purposes
+        /// </summary>
         public string Details { get; }
 
+        /// <summary>
+        /// Constructs new playback exception args
+        /// </summary>
+        /// <param name="exception">The actual exception</param>
+        /// <param name="details">A nicely formatted version of the exception for display purposes</param>
         public PlaybackExceptionEventArgs(Exception exception, string details)
         {
             Exception = exception;

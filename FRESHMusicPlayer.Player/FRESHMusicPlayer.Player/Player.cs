@@ -8,12 +8,19 @@ using System.Threading.Tasks;
 
 namespace FRESHMusicPlayer
 {
+    /// <summary>
+    /// The main class for playing audio using FMP Core.
+    /// Intended to be constructed once and used for the entire app's lifetime
+    /// </summary>
     public class Player
     {
         /// <summary>
         /// The current backend the Player is using for audio playback
         /// </summary>
         public IAudioBackend CurrentBackend { get; private set; }
+        /// <summary>
+        /// Metadata for the current track the Player is playing
+        /// </summary>
         public IMetadataProvider Metadata { get; private set; }
         /// <summary>
         /// The current playback position./>
@@ -44,6 +51,9 @@ namespace FRESHMusicPlayer
             }
         }
 
+        /// <summary>
+        /// Whether the Player is in a loading state - You cannot start playing a new track while this is true.
+        /// </summary>
         public bool IsLoading { get; private set; } = false;
         /// <summary>
         /// The current path the Player is playing. Keep in mind that this may not necessarily be a file. For example, it could be the
@@ -60,8 +70,14 @@ namespace FRESHMusicPlayer
         /// </summary>
         public bool Paused { get; set; }
 
+        /// <summary>
+        /// The play queue
+        /// </summary>
         public PlayQueue Queue { get; set; } = new PlayQueue();
 
+        /// <summary>
+        /// Raised whenever the player is beginning to load a track, before SongChanged is raised
+        /// </summary>
         public event EventHandler SongLoading;
         /// <summary>
         /// Raised whenever a new track is being played.
@@ -130,9 +146,10 @@ namespace FRESHMusicPlayer
             await PlayAsync();
         }
         /// <summary>
-        /// Starts playing the Queue. In order to play a track, you must first add it to the Queue using <see cref="AddQueue(string)"/>.
+        /// Starts playing the Queue. In order to play a track, you must first add it to the Queue.
         /// </summary>
         /// <param name="repeat">If true, avoids dequeuing the next track. Not to be used for anything other than the player.</param>
+        /// <param name="loadMetadata">Whether to load metadata for the track</param>
         public async Task PlayAsync(bool repeat = false, bool loadMetadata = true)
         {
             if (IsLoading) return;
@@ -198,7 +215,7 @@ namespace FRESHMusicPlayer
         }
 
         /// <summary>
-        /// Pauses playback without disposing. Can later be resumed with <see cref="ResumeMusic()"/>.
+        /// Pauses playback without disposing. Can later be resumed with <see cref="Resume()"/>.
         /// </summary>
         public void Pause()
         {

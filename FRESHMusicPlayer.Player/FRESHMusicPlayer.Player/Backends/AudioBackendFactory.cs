@@ -8,7 +8,11 @@ using System.Threading.Tasks;
 
 namespace FRESHMusicPlayer.Backends
 {
-    static class AudioBackendFactory
+    /// <summary>
+    /// A lower level class for directly getting audio backends.
+    /// You should probably use the Player class unless there's a reason you need more control.
+    /// </summary>
+    public static class AudioBackendFactory
     {
         private readonly static ContainerConfiguration config = new ContainerConfiguration();
         private readonly static CompositionHost container;
@@ -36,6 +40,10 @@ namespace FRESHMusicPlayer.Backends
             }
         }
 
+        /// <summary>
+        /// Adds a directory where FMP will search for audio backends
+        /// </summary>
+        /// <param name="path">The file path of the directory</param>
         public static void AddDirectory(string path)
         {
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
@@ -51,6 +59,12 @@ namespace FRESHMusicPlayer.Backends
             container = config.CreateContainer();
         }
 
+        /// <summary>
+        /// Queries the audio backend system for the most appropiate backend for the supplied path
+        /// </summary>
+        /// <param name="filename">The file path to play</param>
+        /// <returns>The appropiate backend</returns>
+        /// <exception cref="Exception">Thrown if no backend could be found</exception>
         public static async Task<IAudioBackend> CreateAndLoadBackendAsync(string filename)
         {
             var problems = new List<(BackendLoadResult, Exception)>();
