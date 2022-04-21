@@ -36,7 +36,7 @@ namespace FRESHMusicPlayer.Backends
             }
         }
 
-        private static void AddDirectory(string path)
+        public static void AddDirectory(string path)
         {
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
  
@@ -46,7 +46,7 @@ namespace FRESHMusicPlayer.Backends
         static AudioBackendFactory()
         {
             AddDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backends"));
-            AddDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FRESHMusicPlayer", "Backends"));
+            AddDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "FRESHMusicPlayer", "Backends"));
             config.WithAssembly(typeof(AudioBackendFactory).Assembly);
             container = config.CreateContainer();
         }
