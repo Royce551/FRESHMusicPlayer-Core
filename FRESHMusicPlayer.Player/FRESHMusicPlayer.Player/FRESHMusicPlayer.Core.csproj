@@ -6,8 +6,15 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <PackageTags>audio music-player</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageProjectUrl></PackageProjectUrl>
-	  <PackageVersion>4.0.1</PackageVersion>  
+    <PackageProjectUrl>https://github.com/royce551/freshmusicplayer-core</PackageProjectUrl>
+	  <PackageVersion>4.0.2</PackageVersion>
+	  <RepositoryUrl>https://github.com/royce551/freshmusicplayer-core</RepositoryUrl>
+	  <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+	  <AssemblyVersion>4.0.2.0</AssemblyVersion>
+	  <FileVersion>4.0.2.0</FileVersion>
+	  <Version>4.0.2</Version>
+	  <Company>Squid Grill @ open source contributors</Company>
+	  <Description>Audio library abstraction library designed to make creating an audio player easier :)</Description>  
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release+Package|AnyCPU' ">
     <Optimize>true</Optimize>

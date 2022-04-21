@@ -4,9 +4,413 @@
         <name>FRESHMusicPlayer.Core</name>
     </assembly>
     <members>
+        <member name="T:FRESHMusicPlayer.Backends.AudioBackendFactory">
+            <summary>
+            A lower level class for directly getting audio backends.
+            You should probably use the Player class unless there's a reason you need more control.
+            </summary>
+        </member>
+        <member name="M:FRESHMusicPlayer.Backends.AudioBackendFactory.AddDirectory(System.String)">
+            <summary>
+            Adds a directory where FMP will search for audio backends
+            </summary>
+            <param name="path">The file path of the directory</param>
+        </member>
+        <member name="M:FRESHMusicPlayer.Backends.AudioBackendFactory.CreateAndLoadBackendAsync(System.String)">
+            <summary>
+            Queries the audio backend system for the most appropiate backend for the supplied path
+            </summary>
+            <param name="filename">The file path to play</param>
+            <returns>The appropiate backend</returns>
+            <exception cref="T:System.Exception">Thrown if no backend could be found</exception>
+        </member>
+        <member name="T:FRESHMusicPlayer.Backends.FileMetadataProvider">
+            <summary>
+            A metadata provider that uses ATL to get metadata for most audio formats
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.FileMetadataProvider.Title">
+            <inheritdoc/>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.FileMetadataProvider.Artists">
+            <inheritdoc/>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.FileMetadataProvider.Album">
+            <inheritdoc/>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.FileMetadataProvider.CoverArt">
+            <inheritdoc/>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.FileMetadataProvider.Genres">
+            <inheritdoc/>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.FileMetadataProvider.Year">
+            <inheritdoc/>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.FileMetadataProvider.TrackNumber">
+            <inheritdoc/>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.FileMetadataProvider.TrackTotal">
+            <inheritdoc/>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.FileMetadataProvider.DiscNumber">
+            <inheritdoc/>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.FileMetadataProvider.DiscTotal">
+            <inheritdoc/>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.FileMetadataProvider.Length">
+            <inheritdoc/>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.FileMetadataProvider.ATLTrack">
+            <inheritdoc/>
+        </member>
+        <member name="M:FRESHMusicPlayer.Backends.FileMetadataProvider.#ctor(System.String)">
+            <summary>
+            Gets metadata for the supplied file path
+            </summary>
+            <param name="path">The file path to query metadata for</param>
+        </member>
+        <member name="T:FRESHMusicPlayer.Backends.IAudioBackend">
+            <summary>
+            A wrapper for some type of audio library for playing audio
+            </summary>
+        </member>
+        <member name="M:FRESHMusicPlayer.Backends.IAudioBackend.LoadSongAsync(System.String)">
+            <summary>
+            Loads the track and gets the backend ready for playback
+            </summary>
+            <param name="file">File path of the track to be played</param>
+            <returns>The result of the load attempt</returns>
+        </member>
+        <member name="M:FRESHMusicPlayer.Backends.IAudioBackend.GetMetadataAsync(System.String)">
+            <summary>
+            Gets metadata for the given file path
+            </summary>
+            <param name="file">File path of the track to query metadata for</param>
+            <returns>The metadata</returns>
+        </member>
+        <member name="M:FRESHMusicPlayer.Backends.IAudioBackend.Play">
+            <summary>
+            Begins playback. If paused, begins playback again
+            </summary>
+        </member>
+        <member name="M:FRESHMusicPlayer.Backends.IAudioBackend.Pause">
+            <summary>
+            Pauses playback but keeps the backend ready to continue
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IAudioBackend.CurrentTime">
+            <summary>
+            The current playhead position in the track
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IAudioBackend.TotalTime">
+            <summary>
+            The total length of the track
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IAudioBackend.Volume">
+            <summary>
+            The current playback volume, from 0 to 1
+            </summary>
+        </member>
+        <member name="E:FRESHMusicPlayer.Backends.IAudioBackend.OnPlaybackStopped">
+            <summary>
+            Raised when playback stops
+            </summary>
+        </member>
+        <member name="T:FRESHMusicPlayer.Backends.IMetadataProvider">
+            <summary>
+            Should be populated with info about the track the backend is playing
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IMetadataProvider.Title">
+            <summary>
+            Title of the track
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IMetadataProvider.Artists">
+            <summary>
+            Artists of the track
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IMetadataProvider.Album">
+            <summary>
+            The album the track comes from
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IMetadataProvider.CoverArt">
+            <summary>
+            Binary image data for the, ideally, front cover of the album
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IMetadataProvider.Genres">
+            <summary>
+            Genres of the track
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IMetadataProvider.Year">
+            <summary>
+            Year the track was made. If not available, 0
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IMetadataProvider.TrackNumber">
+            <summary>
+            Track's track number. If not available, 0
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IMetadataProvider.TrackTotal">
+            <summary>
+            Total number of tracks in the album the track is in. If not available, 0
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IMetadataProvider.DiscNumber">
+            <summary>
+            Disc number of the album the track is in. If not available, 0
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IMetadataProvider.DiscTotal">
+            <summary>
+            Total number of discs in the album the track is in. If not available, 0
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Backends.IMetadataProvider.Length">
+            <summary>
+            The length of the track in seconds
+            </summary>
+        </member>
+        <member name="T:FRESHMusicPlayer.Backends.BackendLoadResult">
+            <summary>
+            The result of a backend load attempt
+            </summary>
+        </member>
+        <member name="F:FRESHMusicPlayer.Backends.BackendLoadResult.OK">
+            <summary>
+            The backend loaded successfully and is really to start playing!
+            </summary>
+        </member>
+        <member name="F:FRESHMusicPlayer.Backends.BackendLoadResult.NotSupported">
+            <summary>
+            The backend does not support the kind of file given
+            </summary>
+        </member>
+        <member name="F:FRESHMusicPlayer.Backends.BackendLoadResult.Invalid">
+            <summary>
+            An invalid file was given
+            </summary>
+        </member>
+        <member name="F:FRESHMusicPlayer.Backends.BackendLoadResult.Corrupt">
+            <summary>
+            There is something wrong with the file given
+            </summary>
+        </member>
+        <member name="F:FRESHMusicPlayer.Backends.BackendLoadResult.UnknownError">
+            <summary>
+            Something else went wrong
+            </summary>
+        </member>
+        <member name="T:FRESHMusicPlayer.Library">
+            <summary>
+            Wrapper over LiteDB for interacting with the FMP library
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Library.Database">
+            <summary>
+            The actual LiteDB connection, for things that can't be done with the methods here
+            </summary>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.#ctor(LiteDB.LiteDatabase)">
+            <summary>
+            Constructs a new library
+            </summary>
+            <param name="library">The actual LiteDB connection</param>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.Read(System.String)">
+            <summary>
+            Gets all tracks in the library
+            </summary>
+            <param name="filter">Property of DatabaseTrack to order by</param>
+            <returns>All the tracks in the library</returns>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.ReadTracksForArtist(System.String)">
+            <summary>
+            Gets all tracks for the given artist
+            </summary>
+            <param name="artist">The artist to get tracks for</param>
+            <returns>All the tracks for the artist</returns>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.ReadTracksForAlbum(System.String)">
+            <summary>
+            Gets all tracks for the given album
+            </summary>
+            <param name="album">The artist to get tracks for</param>
+            <returns>All the tracks for the album</returns>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.ReadTracksForPlaylist(System.String)">
+            <summary>
+            Gets all tracks for the given playlist. This must be Task.Run()'d due to a quirk that will be fixed next major release
+            </summary>
+            <param name="playlist">The artist to get tracks for</param>
+            <returns>All the tracks for the playlist</returns>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.AddTrackToPlaylist(System.String,System.String)">
+            <summary>
+            Adds a track to a playlist
+            </summary>
+            <param name="playlist">The playlist</param>
+            <param name="path">The file path to add</param>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.RemoveTrackFromPlaylist(System.String,System.String)">
+            <summary>
+            Removes a track from a playlist
+            </summary>
+            <param name="playlist">The playlist</param>
+            <param name="path">The file path to remove</param>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.CreatePlaylist(System.String,System.String)">
+            <summary>
+            Creates a new playlist
+            </summary>
+            <param name="playlist">The name of the playlist</param>
+            <param name="path">An optional track to start the playlist off with</param>
+            <returns>The created playlist</returns>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.DeletePlaylist(System.String)">
+            <summary>
+            Deletes a playlist
+            </summary>
+            <param name="playlist">The name of the playlist to delete</param>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.Import(System.String[])">
+            <summary>
+            Imports some tracks to the library
+            </summary>
+            <param name="tracks">The file paths to import</param>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.Import(System.Collections.Generic.List{System.String})">
+            <summary>
+            Imports some tracks to the library
+            </summary>
+            <param name="tracks">The file paths to import</param>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.Import(System.String)">
+            <summary>
+            Imports a track to the library
+            </summary>
+            <param name="path">The file path to import</param>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.Remove(System.String)">
+            <summary>
+            Removes a track from the library
+            </summary>
+            <param name="path">The file path to remove</param>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.Nuke(System.Boolean)">
+            <summary>
+            Clears the entire library
+            </summary>
+            <param name="nukePlaylists">Whether to also clear playlists</param>
+        </member>
+        <member name="M:FRESHMusicPlayer.Library.GetFallbackTrack(System.String)">
+            <summary>
+            Gets a DatabaseTrack for the given file path. Will try getting from the library system first (fast), before
+            falling back to the audio backend system, then finally the default ATL handling
+            </summary>
+            <param name="path">The file path</param>
+            <returns>The track</returns>
+        </member>
+        <member name="T:FRESHMusicPlayer.DatabaseTrack">
+            <summary>
+            Representation of a track in the database
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.DatabaseTrack.Path">
+            <summary>
+            The file path
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.DatabaseTrack.Title">
+            <summary>
+            Title of the track
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.DatabaseTrack.Artist">
+            <summary>
+            Semicolon separated list of artists
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.DatabaseTrack.Album">
+            <summary>
+            Album of the track
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.DatabaseTrack.TrackNumber">
+            <summary>
+            The track's track number. If not available, set to 0
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.DatabaseTrack.Length">
+            <summary>
+            The length of the track in seconds
+            </summary>
+        </member>
+        <member name="T:FRESHMusicPlayer.DatabasePlaylist">
+            <summary>
+            Representation of a playlist in the database
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.DatabasePlaylist.DatabasePlaylistID">
+            <summary>
+            The ID of the playlist
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.DatabasePlaylist.Name">
+            <summary>
+            The playlist's name
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.DatabasePlaylist.Tracks">
+            <summary>
+            All tracks in the playlist
+            </summary>
+        </member>
+        <member name="T:FRESHMusicPlayer.PlaybackExceptionEventArgs">
+            <summary>
+            Playback exception args
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.PlaybackExceptionEventArgs.Exception">
+            <summary>
+            The actual exception
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.PlaybackExceptionEventArgs.Details">
+            <summary>
+            A nicely formatted version of the exception for display purposes
+            </summary>
+        </member>
+        <member name="M:FRESHMusicPlayer.PlaybackExceptionEventArgs.#ctor(System.Exception,System.String)">
+            <summary>
+            Constructs new playback exception args
+            </summary>
+            <param name="exception">The actual exception</param>
+            <param name="details">A nicely formatted version of the exception for display purposes</param>
+        </member>
+        <member name="T:FRESHMusicPlayer.Player">
+            <summary>
+            The main class for playing audio using FMP Core.
+            Intended to be constructed once and used for the entire app's lifetime
+            </summary>
+        </member>
         <member name="P:FRESHMusicPlayer.Player.CurrentBackend">
             <summary>
             The current backend the Player is using for audio playback
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Player.Metadata">
+            <summary>
+            Metadata for the current track the Player is playing
             </summary>
         </member>
         <member name="P:FRESHMusicPlayer.Player.CurrentTime">
@@ -30,6 +434,11 @@
             The current volume, from 0 to 1.
             </summary>
         </member>
+        <member name="P:FRESHMusicPlayer.Player.IsLoading">
+            <summary>
+            Whether the Player is in a loading state - You cannot start playing a new track while this is true.
+            </summary>
+        </member>
         <member name="P:FRESHMusicPlayer.Player.FilePath">
             <summary>
             The current path the Player is playing. Keep in mind that this may not necessarily be a file. For example, it could be the
@@ -45,6 +454,16 @@
         <member name="P:FRESHMusicPlayer.Player.Paused">
             <summary>
             Whether the Player is paused.
+            </summary>
+        </member>
+        <member name="P:FRESHMusicPlayer.Player.Queue">
+            <summary>
+            The play queue
+            </summary>
+        </member>
+        <member name="E:FRESHMusicPlayer.Player.SongLoading">
+            <summary>
+            Raised whenever the player is beginning to load a track, before SongChanged is raised
             </summary>
         </member>
         <member name="E:FRESHMusicPlayer.Player.SongChanged">
@@ -81,9 +500,10 @@
         </member>
         <member name="M:FRESHMusicPlayer.Player.PlayAsync(System.Boolean,System.Boolean)">
             <summary>
-            Starts playing the Queue. In order to play a track, you must first add it to the Queue using <see cref="!:AddQueue(string)"/>.
+            Starts playing the Queue. In order to play a track, you must first add it to the Queue.
             </summary>
             <param name="repeat">If true, avoids dequeuing the next track. Not to be used for anything other than the player.</param>
+            <param name="loadMetadata">Whether to load metadata for the track</param>
         </member>
         <member name="M:FRESHMusicPlayer.Player.Stop">
             <summary>
@@ -92,7 +512,7 @@
         </member>
         <member name="M:FRESHMusicPlayer.Player.Pause">
             <summary>
-            Pauses playback without disposing. Can later be resumed with <see cref="!:ResumeMusic()"/>.
+            Pauses playback without disposing. Can later be resumed with <see cref="M:FRESHMusicPlayer.Player.Resume"/>.
             </summary>
         </member>
         <member name="M:FRESHMusicPlayer.Player.Resume">
