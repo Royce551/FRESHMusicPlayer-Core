@@ -182,7 +182,7 @@ namespace FRESHMusicPlayer
                 try
                 {
                     var backend = AudioBackendFactory.CreateAndLoadBackendAsync(path).Result; // doing async over sync here isn't that great
-                    var track = backend.GetMetadataAsync(path).Result;                 // but it's likely that the frontend will task.run this anyway
+                    var track = backend.backend?.GetMetadataAsync(path).Result;                 // but it's likely that the frontend will task.run this anyway
                     if (track != null) return new DatabaseTrack { Artist = string.Join(", ", track.Artists), Title = track.Title, Album = track.Album, Length = track.Length, Path = path, TrackNumber = track.TrackNumber };
                 }
                 catch

@@ -97,6 +97,17 @@ namespace FRESHMusicPlayer
             }
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
+        public void PlayNext(string filePath)
+        {
+            queue.Insert(Position, filePath);
+            if (Shuffle)
+            {
+                shuffledQueue.Insert(Position, filePath);
+                // not shuffling since we want this track to play next
+            }
+            QueueChanged?.Invoke(null, EventArgs.Empty);
+        }
+
         /// <summary>
         /// Clears the queue.
         /// </summary>

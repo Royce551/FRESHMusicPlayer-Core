@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FRESHMusicPlayer.Backends;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,21 +15,19 @@ namespace FRESHMusicPlayer
         /// <summary>
         /// The actual exception
         /// </summary>
-        public Exception Exception { get; }
-        /// <summary>
-        /// A nicely formatted version of the exception for display purposes
-        /// </summary>
-        public string Details { get; }
+        public Dictionary<string, Exception> Exceptions { get; }
+        
+        public Dictionary<string, BackendLoadResult> Problems { get; }
 
         /// <summary>
         /// Constructs new playback exception args
         /// </summary>
         /// <param name="exception">The actual exception</param>
         /// <param name="details">A nicely formatted version of the exception for display purposes</param>
-        public PlaybackExceptionEventArgs(Exception exception, string details)
+        public PlaybackExceptionEventArgs(Dictionary<string, Exception> exceptions, Dictionary<string, BackendLoadResult> problems)
         {
-            Exception = exception;
-            Details = details;
+            Exceptions = exceptions;
+            Problems = problems;
         }
     }
 }

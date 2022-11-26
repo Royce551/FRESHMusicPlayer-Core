@@ -86,7 +86,7 @@ namespace FRESHMusicPlayer
         /// <summary>
         /// Raised whenever the player is stopping.
         /// </summary>
-        public event EventHandler SongStopped;
+        public event EventHandler<PlaybackStoppedEventArgs> SongStopped;
         /// <summary>
         /// Raised whenever an exception is thrown while the Player is loading a file.
         /// </summary>
@@ -159,9 +159,17 @@ namespace FRESHMusicPlayer
             if (!repeat && Queue.Queue.Count != 0)
                 FilePath = Queue.Queue[Queue.Position];
             Queue.Position++;
+
             async Task PMusic()
             {
-                CurrentBackend = await AudioBackendFactory.CreateAndLoadBackendAsync(FilePath);
+                var (backend, problems) = await AudioBackendFactory.CreateAndLoadBackendAsync(FilePath);
+                if (backend is null)
+                {
+                    SongException?.Invoke(null, problems);
+                    IsLoading = false;
+                    return;
+                }
+                else CurrentBackend = backend;
 
                 CurrentBackend.Play();
                 CurrentBackend.Volume = Volume;
@@ -170,39 +178,28 @@ namespace FRESHMusicPlayer
                 FileLoaded = true;
 
                 if (loadMetadata) Metadata = await CurrentBackend.GetMetadataAsync(FilePath);
-            }
 
-            try
-            {
-                if (FileLoaded != true)
-                {
-                    await PMusic();
-                }
-                else
-                {
-                    AvoidNextQueue = true;
-                    Stop();
-                    await PMusic();
-                }
-
-                SongChanged?.Invoke(null,
-                    EventArgs.Empty); // Now that playback has started without any issues, fire the song changed event.
-            }
-            catch (Exception e)
-            {
-                var args = new PlaybackExceptionEventArgs(e, $"{e.Message}\n{e.StackTrace}");
-                SongException?.Invoke(null, args);
-            }
-            finally
-            {
                 IsLoading = false;
             }
+
+            if (FileLoaded != true)
+            {
+                await PMusic();
+            }
+            else
+            {
+                AvoidNextQueue = true;
+                Stop(false);
+                await PMusic();
+            }
+
+            SongChanged?.Invoke(null, EventArgs.Empty); // Now that playback has started without any issues, fire the song changed event.
         }
 
         /// <summary>
         /// Completely stops and disposes the player and resets all playback related variables to their defaults.
         /// </summary>
-        public void Stop()
+        public void Stop(bool isEndOfPlayback = true)
         {
             if (!FileLoaded) return;
 
@@ -211,7 +208,7 @@ namespace FRESHMusicPlayer
 
             FileLoaded = false;
             Paused = false;
-            SongStopped?.Invoke(null, EventArgs.Empty);
+            SongStopped?.Invoke(null, new PlaybackStoppedEventArgs(isEndOfPlayback));
         }
 
         /// <summary>

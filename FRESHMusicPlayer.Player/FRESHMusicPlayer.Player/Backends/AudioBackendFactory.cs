@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Composition.Hosting;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -65,9 +66,11 @@ namespace FRESHMusicPlayer.Backends
         /// <param name="filename">The file path to play</param>
         /// <returns>The appropiate backend</returns>
         /// <exception cref="Exception">Thrown if no backend could be found</exception>
-        public static async Task<IAudioBackend> CreateAndLoadBackendAsync(string filename)
+        public static async Task<(IAudioBackend backend, PlaybackExceptionEventArgs problems)> CreateAndLoadBackendAsync(string filename)
         {
-            var problems = new List<(BackendLoadResult, Exception)>();
+            var exceptions = new Dictionary<string, Exception>();
+            var problems = new Dictionary<string, BackendLoadResult>();
+
             foreach (var lazybackend in container.GetExports<Lazy<IAudioBackend>>())
             {
                 IAudioBackend backend = lazybackend.Value;
@@ -76,18 +79,19 @@ namespace FRESHMusicPlayer.Backends
                     var result = await backend.LoadSongAsync(filename);
                     if (result != BackendLoadResult.OK)
                     {
-                        problems.Add((result, null));
+                        problems.Add(backend.ToString(), result);
                         backend.Dispose();
                     }
-                    else return backend;
+                    else return (backend, null);
                 }
                 catch (Exception e)
                 {
-                    problems.Add((BackendLoadResult.UnknownError, e));
+                    problems.Add(lazybackend.ToString(), BackendLoadResult.UnknownError);
+                    exceptions.Add(lazybackend.ToString(), e);
                     backend.Dispose();
                 }
             }
-            throw new Exception($"A backend couldn't be found to load this file\n{string.Join("\n", problems)}");
+            return (null, new PlaybackExceptionEventArgs(exceptions, problems));
         }
     }
 }
