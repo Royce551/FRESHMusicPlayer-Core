@@ -97,6 +97,10 @@ namespace FRESHMusicPlayer
             }
             QueueChanged?.Invoke(null, EventArgs.Empty);
         }
+        /// <summary>
+        /// Adds a track to play after the currently playing track
+        /// </summary>
+        /// <param name="filePath">The track to add.</param>
         public void PlayNext(string filePath)
         {
             queue.Insert(Position, filePath);

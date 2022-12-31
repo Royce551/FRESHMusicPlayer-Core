@@ -103,7 +103,7 @@ namespace FRESHMusicPlayer
             Queue.Position -= 2;
             await PlayAsync();
         }
-
+        
         /// <summary>
         /// Skips to the next track in the Queue. If there are no more tracks, the player will stop.
         /// </summary>
@@ -142,6 +142,7 @@ namespace FRESHMusicPlayer
         /// <param name="path">The track to play</param>
         public async Task PlayAsync(string path)
         {
+            Queue.Clear();
             Queue.Add(path);
             await PlayAsync();
         }
