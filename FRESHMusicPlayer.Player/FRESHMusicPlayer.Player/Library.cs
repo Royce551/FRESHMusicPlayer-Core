@@ -4,242 +4,230 @@ using LiteDB;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member temp
 
 namespace FRESHMusicPlayer
 {
-    /// <summary>
-    /// Wrapper over LiteDB for interacting with the FMP library
-    /// </summary>
     public class Library
     {
-        /// <summary>
-        /// The actual LiteDB connection, for things that can't be done with the methods here
-        /// </summary>
         public LiteDatabase Database { get; private set; }
 
-        /// <summary>
-        /// Constructs a new library
-        /// </summary>
-        /// <param name="library">The actual LiteDB connection</param>
-        public Library(LiteDatabase library)
+        public bool IsDatabaseProcessing { get; private set; } = false;
+
+        public const string TracksCollectionName = "Tracks";
+        public const string PlaylistsCollectionName = "Playlists";
+
+        public Library(LiteDatabase database)
         {
-            Database = library;
+            Database = database;
         }
-        /// <summary>
-        /// Gets all tracks in the library
-        /// </summary>
-        /// <param name="filter">Property of DatabaseTrack to order by</param>
-        /// <returns>All the tracks in the library</returns>
-        public List<DatabaseTrack> Read(string filter = "Title") => Database.GetCollection<DatabaseTrack>("tracks").Query().OrderBy(filter).ToList();
-        /// <summary>
-        /// Gets all tracks for the given artist
-        /// </summary>
-        /// <param name="artist">The artist to get tracks for</param>
-        /// <returns>All the tracks for the artist</returns>
-        public List<DatabaseTrack> ReadTracksForArtist(string artist) => Database.GetCollection<DatabaseTrack>("tracks").Query().Where(x => x.Artist == artist).OrderBy("Title").ToList();
-        /// <summary>
-        /// Gets all tracks for the given album
-        /// </summary>
-        /// <param name="album">The artist to get tracks for</param>
-        /// <returns>All the tracks for the album</returns>
-        public List<DatabaseTrack> ReadTracksForAlbum(string album) => Database.GetCollection<DatabaseTrack>("tracks").Query().Where(x => x.Album == album).OrderBy("TrackNumber").ToList();
-        /// <summary>
-        /// Gets all tracks for the given playlist. This must be Task.Run()'d due to a quirk that will be fixed next major release
-        /// </summary>
-        /// <param name="playlist">The artist to get tracks for</param>
-        /// <returns>All the tracks for the playlist</returns>
-        public List<DatabaseTrack> ReadTracksForPlaylist(string playlist)
+
+        public virtual List<DatabaseTrack> GetAllTracks(string filter = "Title") => Database.GetCollection<DatabaseTrack>(TracksCollectionName).Query().OrderBy(filter).ToList();
+        public virtual List<DatabaseTrack> GetTracksForArtist(string artist) => Database.GetCollection<DatabaseTrack>(TracksCollectionName).Query().Where(x => x.Artists.Contains(artist)).OrderBy("Title").ToList();
+        public virtual List<DatabaseTrack> GetTracksForAlbum(string album) => Database.GetCollection<DatabaseTrack>(TracksCollectionName).Query().Where(x => x.Album == album).OrderBy("TrackNumber").ToList();
+
+        public virtual List<DatabaseTrack> GetTracksForPlaylist(string playlist)
         {
-            var x = Database.GetCollection<DatabasePlaylist>("playlists").FindOne(y => y.Name == playlist);
-            var z = new List<DatabaseTrack>();
-            foreach (string path in x.Tracks) z.Add(GetFallbackTrack(path));
-            return z;
+            var dbPlaylist = Database.GetCollection<DatabasePlaylist>(PlaylistsCollectionName).FindOne(x => x.Name == playlist);
+            return Database.GetCollection<DatabaseTrack>(TracksCollectionName).Query().Where(x => dbPlaylist.Tracks.Contains(x.Id)).ToList();
         }
-        /// <summary>
-        /// Adds a track to a playlist
-        /// </summary>
-        /// <param name="playlist">The playlist</param>
-        /// <param name="path">The file path to add</param>
-        public virtual void AddTrackToPlaylist(string playlist, string path)
+
+        public virtual async Task AddTrackToPlaylistAsync(string playlist, string path, bool isSystemPlaylist = false)
         {
-            var x = Database.GetCollection<DatabasePlaylist>("playlists").FindOne(y => y.Name == playlist);
-            if (Database.GetCollection<DatabasePlaylist>("playlists").FindOne(y => y.Name == playlist) is null)
+            var dbPlaylist = Database.GetCollection<DatabasePlaylist>(PlaylistsCollectionName).FindOne(x => x.Name == playlist);
+            var track = Database.GetCollection<DatabaseTrack>(TracksCollectionName).FindOne(x => x.Path == path);
+            if (track is null)
             {
-                x = CreatePlaylist(playlist, path);
-                x.Tracks.Add(path);
+                await ImportAsync(path);
+                track = Database.GetCollection<DatabaseTrack>(TracksCollectionName).FindOne(x => x.Path == path);
             }
-            else
-            {
-                x.Tracks.Add(path);
-                Database.GetCollection<DatabasePlaylist>("playlists").Update(x);
-            }
+
+            if (dbPlaylist is null)
+                dbPlaylist = await CreatePlaylistAsync(playlist, isSystemPlaylist, path);
+
+            dbPlaylist.Tracks.Add(track.Id);
+            Database.GetCollection<DatabasePlaylist>(PlaylistsCollectionName).Update(dbPlaylist);
         }
-        /// <summary>
-        /// Removes a track from a playlist
-        /// </summary>
-        /// <param name="playlist">The playlist</param>
-        /// <param name="path">The file path to remove</param>
+
         public virtual void RemoveTrackFromPlaylist(string playlist, string path)
         {
-            var x = Database.GetCollection<DatabasePlaylist>("playlists").FindOne(y => y.Name == playlist);
-            x.Tracks.Remove(path);
-            Database.GetCollection<DatabasePlaylist>("playlists").Update(x);
+            var dbPlaylist = Database.GetCollection<DatabasePlaylist>(PlaylistsCollectionName).FindOne(x => x.Name == playlist);
+            var track = Database.GetCollection<DatabaseTrack>(TracksCollectionName).FindOne(x => x.Path == path);
+            dbPlaylist.Tracks.Remove(track.Id);
+            Database.GetCollection<DatabasePlaylist>(PlaylistsCollectionName).Update(dbPlaylist);
         }
-        /// <summary>
-        /// Creates a new playlist
-        /// </summary>
-        /// <param name="playlist">The name of the playlist</param>
-        /// <param name="path">An optional track to start the playlist off with</param>
-        /// <returns>The created playlist</returns>
-        public virtual DatabasePlaylist CreatePlaylist(string playlist, string path = null)
+
+        public virtual async Task<DatabasePlaylist> CreatePlaylistAsync(string playlist, bool isSystemPlaylist, string path = null)
         {
-            var newplaylist = new DatabasePlaylist
+            var newPlaylist = new DatabasePlaylist
             {
                 Name = playlist,
-                Tracks = new List<string>()
+                Tracks = new List<int>(),
+                IsSystemPlaylist = isSystemPlaylist
             };
-            if (Database.GetCollection<DatabasePlaylist>("playlists").Count() == 0) newplaylist.DatabasePlaylistID = 0;
-            else newplaylist.DatabasePlaylistID = Database.GetCollection<DatabasePlaylist>("playlists").Query().ToList().Last().DatabasePlaylistID + 1;
-            if (path != null) newplaylist.Tracks.Add(path);
-            Database.GetCollection<DatabasePlaylist>("playlists").Insert(newplaylist);
-            return newplaylist;
+
+            Database.GetCollection<DatabasePlaylist>(PlaylistsCollectionName).Insert(newPlaylist);
+            if (path != null) await AddTrackToPlaylistAsync(playlist, path);
+            return newPlaylist;
         }
-        /// <summary>
-        /// Deletes a playlist
-        /// </summary>
-        /// <param name="playlist">The name of the playlist to delete</param>
-        public virtual void DeletePlaylist(string playlist) => Database.GetCollection<DatabasePlaylist>("playlists").DeleteMany(x => x.Name == playlist);
-        /// <summary>
-        /// Imports some tracks to the library
-        /// </summary>
-        /// <param name="tracks">The file paths to import</param>
-        public virtual void Import(string[] tracks)
+
+        public virtual void DeletePlaylist(string playlist) => Database.GetCollection<DatabasePlaylist>(PlaylistsCollectionName).DeleteMany(x => x.Name == playlist);
+
+        public virtual async Task ImportAsync(string[] tracks)
         {
-            var stufftoinsert = new List<DatabaseTrack>();
-            int count = 0;
-            foreach (string y in tracks)
+            var tracksToImport = new List<DatabaseTrack>();
+            
+            foreach (var track in tracks)
             {
-                var track = new Track(y);
-                stufftoinsert.Add(new DatabaseTrack { Title = track.Title, Artist = track.Artist, Album = track.Album, Path = track.Path, TrackNumber = track.TrackNumber, Length = track.Duration });
-                count++;
+                tracksToImport.Add(new DatabaseTrack { Path = track, HasBeenProcessed = false, Title = track });
             }
-            Database.GetCollection<DatabaseTrack>("tracks").InsertBulk(stufftoinsert);
-        }
-        /// <summary>
-        /// Imports some tracks to the library
-        /// </summary>
-        /// <param name="tracks">The file paths to import</param>
-        public virtual void Import(List<string> tracks)
-        {
-            var stufftoinsert = new List<DatabaseTrack>();
-            foreach (string y in tracks)
+            if (tracksToImport is null)
             {
-                var track = new Track(y);
-                stufftoinsert.Add(new DatabaseTrack { Title = track.Title, Artist = track.Artist, Album = track.Album, Path = track.Path, TrackNumber = track.TrackNumber, Length = track.Duration });
+                Console.WriteLine("???");
             }
-            Database.GetCollection<DatabaseTrack>("tracks").InsertBulk(stufftoinsert);
+            Database.GetCollection<DatabaseTrack>(TracksCollectionName).InsertBulk(tracksToImport);
+            _ = ProcessDatabaseMetadataAsync();
         }
-        /// <summary>
-        /// Imports a track to the library
-        /// </summary>
-        /// <param name="path">The file path to import</param>
-        public virtual void Import(string path)
+
+        public virtual async Task ImportAsync(List<string> tracks) => await ImportAsync(tracks.ToArray());
+        public virtual async Task ImportAsync(string track) => await ImportAsync(new string[] { track });
+
+        public virtual async Task ProcessDatabaseMetadataAsync()
         {
-            var track = new Track(path);
-            Database.GetCollection<DatabaseTrack>("tracks")
-                                .Insert(new DatabaseTrack { Title = track.Title, Artist = track.Artist, Album = track.Album, Path = track.Path, TrackNumber = track.TrackNumber, Length = track.Duration });
+            if (IsDatabaseProcessing) return;
+
+            IsDatabaseProcessing = true;
+            var tracksToProcess = Database.GetCollection<DatabaseTrack>(TracksCollectionName).Query().Where(x => !x.HasBeenProcessed).ToList();
+            foreach (var track in tracksToProcess)
+            {
+                DatabaseTrack metadata;
+
+                try
+                {
+                    var backend = await AudioBackendFactory.CreateAndLoadBackendAsync(track.Path);
+                    var track2 = await backend.backend?.GetMetadataAsync(track.Path);
+                    if (track2 != null) metadata = new DatabaseTrack(track.Path, track, true);
+                }
+                catch
+                {
+                    // ignored for now
+                }
+                metadata = new DatabaseTrack(track.Path, new FileMetadataProvider(track.Path), true);
+
+                track.UpdateFieldsFrom(metadata);
+                track.HasBeenProcessed = true;
+                if (!Database.GetCollection<DatabaseTrack>(TracksCollectionName).Update(track)) throw new Exception("Fueh?!?!?!");
+            }
+            IsDatabaseProcessing = false;
         }
-        /// <summary>
-        /// Removes a track from the library
-        /// </summary>
-        /// <param name="path">The file path to remove</param>
-        public virtual void Remove(string path)
+
+        public virtual void Remove(string path) => Database.GetCollection<DatabaseTrack>(TracksCollectionName).DeleteMany(x => x.Path == path);
+
+        public virtual void Nuke(bool alsoNukePlaylists = true)
         {
-            Database.GetCollection<DatabaseTrack>("tracks").DeleteMany(x => x.Path == path);
+            Database.GetCollection<DatabaseTrack>(TracksCollectionName).DeleteAll();
+            if (alsoNukePlaylists) Database.GetCollection<DatabasePlaylist>(PlaylistsCollectionName).DeleteAll();
         }
-        /// <summary>
-        /// Clears the entire library
-        /// </summary>
-        /// <param name="nukePlaylists">Whether to also clear playlists</param>
-        public virtual void Nuke(bool nukePlaylists = true)
+
+        public async Task<DatabaseTrack> GetFallbackTrackAsync(string path)
         {
-            Database.GetCollection<DatabaseTrack>("tracks").DeleteAll();
-            if (nukePlaylists) Database.GetCollection<DatabasePlaylist>("playlists").DeleteAll();
-        }
-        /// <summary>
-        /// Gets a DatabaseTrack for the given file path. Will try getting from the library system first (fast), before
-        /// falling back to the audio backend system, then finally the default ATL handling
-        /// </summary>
-        /// <param name="path">The file path</param>
-        /// <returns>The track</returns>
-        public DatabaseTrack GetFallbackTrack(string path)
-        {
-            var dbTrack = Database.GetCollection<DatabaseTrack>("tracks").FindOne(x => path == x.Path);
+            var dbTrack = Database.GetCollection<DatabaseTrack>(TracksCollectionName).FindOne(x => path == x.Path);
             if (dbTrack != null) return dbTrack;
             else
             {
                 try
                 {
-                    var backend = AudioBackendFactory.CreateAndLoadBackendAsync(path).Result; // doing async over sync here isn't that great
-                    var track = backend.backend?.GetMetadataAsync(path).Result;                 // but it's likely that the frontend will task.run this anyway
-                    if (track != null) return new DatabaseTrack { Artist = string.Join(", ", track.Artists), Title = track.Title, Album = track.Album, Length = track.Length, Path = path, TrackNumber = track.TrackNumber };
+                    var backend = await AudioBackendFactory.CreateAndLoadBackendAsync(path);
+                    var track = await backend.backend?.GetMetadataAsync(path);
+                    if (track != null) return new DatabaseTrack(path, track, true);
                 }
                 catch
                 {
                     // ignored (for now)
                 }
-                var atlTrack = new Track(path);
-                return new DatabaseTrack { Artist = atlTrack.Artist, Title = atlTrack.Title, Album = atlTrack.Album, TrackNumber = atlTrack.TrackNumber, Length = atlTrack.Duration };
+                return new DatabaseTrack(path, new FileMetadataProvider(path), true);
             }
-        }
+        } 
     }
-    /// <summary>
-    /// Representation of a track in the database
-    /// </summary>
+
     public class DatabaseTrack
     {
-        /// <summary>
-        /// The file path
-        /// </summary>
+        public int Id { get; set; }
+
         public string Path { get; set; }
-        /// <summary>
-        /// Title of the track
-        /// </summary>
-        public string Title { get; set; }
-        /// <summary>
-        /// Semicolon separated list of artists
-        /// </summary>
-        public string Artist { get; set; }
-        /// <summary>
-        /// Album of the track
-        /// </summary>
-        public string Album { get; set; }
-        /// <summary>
-        /// The track's track number. If not available, set to 0
-        /// </summary>
+
+        public bool HasBeenProcessed { get; set; }
+
+        public string Title { get; set; } = string.Empty;
+        public string[] Artists { get; set; } = new string[0];
+        public string Album { get; set; } = string.Empty;
+        public string[] Genres { get; set; } = new string[0];
+        public int Year { get; set; }
         public int TrackNumber { get; set; }
-        /// <summary>
-        /// The length of the track in seconds
-        /// </summary>
+        public int TrackTotal { get; set; }
+        public int DiscNumber { get; set; }
+        public int DiscTotal { get; set; }
         public int Length { get; set; }
+
+        public DatabaseTrack()
+        {
+
+        }
+
+        public DatabaseTrack(string path, IMetadataProvider metadata, bool hasBeenProcessed)
+        {
+            Path = path;
+            HasBeenProcessed = hasBeenProcessed;
+            UpdateFieldsFrom(metadata);
+        }
+        public DatabaseTrack(string path, DatabaseTrack track, bool hasBeenProcessed)
+        {
+            Path = path;
+            HasBeenProcessed = hasBeenProcessed;
+            UpdateFieldsFrom(track);
+        }
+
+        public void UpdateFieldsFrom(IMetadataProvider metadata)
+        {
+            Title = metadata.Title;
+            Artists = metadata.Artists;
+            Album = metadata.Album;
+            Genres = metadata.Genres;
+            Year = metadata.Year;
+            TrackNumber = metadata.TrackNumber;
+            TrackTotal = metadata.TrackTotal;
+            DiscNumber = metadata.DiscNumber;
+            DiscTotal = metadata.DiscTotal;
+            Length = metadata.Length;
+        }
+
+        public void UpdateFieldsFrom(DatabaseTrack track)
+        {
+            Title = track.Title;
+            Artists = track.Artists;
+            Album = track.Album;
+            Genres = track.Genres;
+            Year = track.Year;
+            TrackNumber = track.TrackNumber;
+            TrackTotal = track.TrackTotal;
+            DiscNumber = track.DiscNumber;
+            DiscTotal = track.DiscTotal;
+            Length = track.Length;
+        }
     }
-    /// <summary>
-    /// Representation of a playlist in the database
-    /// </summary>
+
     public class DatabasePlaylist
     {
-        /// <summary>
-        /// The ID of the playlist
-        /// </summary>
-        public int DatabasePlaylistID { get; set; }
-        /// <summary>
-        /// The playlist's name
-        /// </summary>
+        public int Id { get; set; }
+
         public string Name { get; set; }
-        /// <summary>
-        /// All tracks in the playlist
-        /// </summary>
-        public List<string> Tracks { get; set; }
+
+        public bool IsSystemPlaylist { get; set; }
+
+        public List<int> Tracks { get; set; }
     }
 }
+#pragma warning restore CS1591
