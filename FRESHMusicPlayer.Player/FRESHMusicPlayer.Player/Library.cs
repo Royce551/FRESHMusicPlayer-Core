@@ -15,8 +15,6 @@ namespace FRESHMusicPlayer
     {
         public LiteDatabase Database { get; private set; }
 
-        public bool IsDatabaseProcessing { get; private set; } = false;
-
         public const string TracksCollectionName = "Tracks";
         public const string PlaylistsCollectionName = "Playlists";
 
@@ -95,12 +93,10 @@ namespace FRESHMusicPlayer
         public virtual async Task ImportAsync(List<string> tracks) => await ImportAsync(tracks.ToArray());
         public virtual async Task ImportAsync(string track) => await ImportAsync(new string[] { track });
 
-        public virtual async Task ProcessDatabaseMetadataAsync()
+        public virtual async Task<List<DatabaseTrack>> ProcessDatabaseMetadataAsync(Action<int> progress = null)
         {
-            if (IsDatabaseProcessing) return;
-
-            IsDatabaseProcessing = true;
             var tracksToProcess = Database.GetCollection<DatabaseTrack>(TracksCollectionName).Query().Where(x => !x.HasBeenProcessed).ToList();
+            var remainingTracksToProcess = tracksToProcess.Count;
             foreach (var track in tracksToProcess)
             {
                 DatabaseTrack metadata;
@@ -120,8 +116,19 @@ namespace FRESHMusicPlayer
                 track.UpdateFieldsFrom(metadata);
                 track.HasBeenProcessed = true;
                 if (!Database.GetCollection<DatabaseTrack>(TracksCollectionName).Update(track)) throw new Exception("Fueh?!?!?!");
+
+                remainingTracksToProcess--;
+                progress?.Invoke(remainingTracksToProcess);
             }
-            IsDatabaseProcessing = false;
+            return tracksToProcess;
+        }
+
+        public virtual void Update(string track, IMetadataProvider newMetadata)
+        {
+            var dbTrack = Database.GetCollection<DatabaseTrack>(TracksCollectionName).FindOne(x => x.Path == track);
+            dbTrack.UpdateFieldsFrom(newMetadata);
+
+            if (!Database.GetCollection<DatabaseTrack>(TracksCollectionName).Update(dbTrack)) throw new Exception("Fueh?!?!?!");
         }
 
         public virtual void Remove(string path) => Database.GetCollection<DatabaseTrack>(TracksCollectionName).DeleteMany(x => x.Path == path);
