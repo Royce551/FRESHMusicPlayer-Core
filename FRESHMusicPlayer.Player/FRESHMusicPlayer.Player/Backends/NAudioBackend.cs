@@ -43,6 +43,11 @@ namespace FRESHMusicPlayer.Backends
 
         public NAudioBackend()
         {
+            
+        }
+
+        public async Task<BackendLoadResult> LoadSongAsync(string file)
+        {
             if (OutputDevice is null)
             {
                 OutputDevice = new WaveOutEvent();
@@ -51,10 +56,7 @@ namespace FRESHMusicPlayer.Backends
                     OnPlaybackStopped.Invoke(null, EventArgs.Empty);
                 };
             }
-        }
 
-        public async Task<BackendLoadResult> LoadSongAsync(string file)
-        {
             if (AudioFile != null) AudioFile.Dispose();
             try
             {

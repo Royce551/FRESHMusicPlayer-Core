@@ -105,6 +105,9 @@ namespace FRESHMusicPlayer
                 {
                     var backend = await AudioBackendFactory.CreateAndLoadBackendAsync(track.Path);
                     var track2 = await backend.backend?.GetMetadataAsync(track.Path);
+
+                    backend.backend?.Dispose();
+
                     if (track2 != null) metadata = new DatabaseTrack(track.Path, track, true);
                 }
                 catch
@@ -149,6 +152,9 @@ namespace FRESHMusicPlayer
                 {
                     var backend = await AudioBackendFactory.CreateAndLoadBackendAsync(path);
                     var track = await backend.backend?.GetMetadataAsync(path);
+
+                    backend.backend?.Dispose();
+
                     if (track != null) return new DatabaseTrack(path, track, true);
                 }
                 catch
