@@ -99,26 +99,31 @@ namespace FRESHMusicPlayer
             var remainingTracksToProcess = tracksToProcess.Count;
             foreach (var track in tracksToProcess)
             {
-                DatabaseTrack metadata;
-
                 try
                 {
                     var backend = await AudioBackendFactory.CreateAndLoadBackendAsync(track.Path);
                     var track2 = await backend.backend?.GetMetadataAsync(track.Path);
 
-                    backend.backend?.Dispose();
+                    IMetadataProvider metadata;
 
-                    if (track2 != null) metadata = new DatabaseTrack(track.Path, track, true);
+                    if (backend.backend != null)
+                    {
+                        metadata = await backend.backend.GetMetadataAsync(track.Path);
+                    }
+                    else
+                    {
+                        metadata = new FileMetadataProvider(track.Path);
+                    }
+                    track.UpdateFieldsFrom(metadata);
+                    track.HasBeenProcessed = true;
+                    if (!Database.GetCollection<DatabaseTrack>(TracksCollectionName).Update(track)) throw new Exception("Fueh?!?!?!");
+
+                    backend.backend?.Dispose();  
                 }
                 catch
                 {
                     // ignored for now
                 }
-                metadata = new DatabaseTrack(track.Path, new FileMetadataProvider(track.Path), true);
-
-                track.UpdateFieldsFrom(metadata);
-                track.HasBeenProcessed = true;
-                if (!Database.GetCollection<DatabaseTrack>(TracksCollectionName).Update(track)) throw new Exception("Fueh?!?!?!");
 
                 remainingTracksToProcess--;
                 progress?.Invoke(remainingTracksToProcess);
