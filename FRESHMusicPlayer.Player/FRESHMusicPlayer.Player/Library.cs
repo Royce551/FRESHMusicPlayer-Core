@@ -3,6 +3,7 @@ using FRESHMusicPlayer.Backends;
 using LiteDB;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -97,37 +98,31 @@ namespace FRESHMusicPlayer
         {
             var tracksToProcess = Database.GetCollection<DatabaseTrack>(TracksCollectionName).Query().Where(x => !x.HasBeenProcessed).ToList();
             var remainingTracksToProcess = tracksToProcess.Count;
-            foreach (var track in tracksToProcess)
+
+
+            Parallel.ForEach(tracksToProcess, async track =>
             {
+                Debug.WriteLine("Thread started");
                 try
                 {
-                    var backend = await AudioBackendFactory.CreateAndLoadBackendAsync(track.Path);
-                    var track2 = await backend.backend?.GetMetadataAsync(track.Path);
+                    IMetadataProvider metadata = (await AudioBackendFactory.CreateAndLoadBackendAndGetMetadataAsync(track.Path)).metadata;
 
-                    IMetadataProvider metadata;
-
-                    if (backend.backend != null)
-                    {
-                        metadata = await backend.backend.GetMetadataAsync(track.Path);
-                    }
-                    else
-                    {
-                        metadata = new FileMetadataProvider(track.Path);
-                    }
+                    if (metadata is null) metadata = new FileMetadataProvider(track.Path);
+                  
                     track.UpdateFieldsFrom(metadata);
                     track.HasBeenProcessed = true;
                     if (!Database.GetCollection<DatabaseTrack>(TracksCollectionName).Update(track)) throw new Exception("Fueh?!?!?!");
-
-                    backend.backend?.Dispose();  
                 }
                 catch
                 {
                     // ignored for now
+                    Debug.WriteLine("Error occured processing metadata");
                 }
 
                 remainingTracksToProcess--;
                 progress?.Invoke(remainingTracksToProcess);
-            }
+            });
+
             return tracksToProcess;
         }
 
@@ -155,12 +150,9 @@ namespace FRESHMusicPlayer
             {
                 try
                 {
-                    var backend = await AudioBackendFactory.CreateAndLoadBackendAsync(path);
-                    var track = await backend.backend?.GetMetadataAsync(path);
+                    var track = await AudioBackendFactory.CreateAndLoadBackendAndGetMetadataAsync(path);
 
-                    backend.backend?.Dispose();
-
-                    if (track != null) return new DatabaseTrack(path, track, true);
+                    if (track.metadata != null) return new DatabaseTrack(path, track.metadata, true);
                 }
                 catch
                 {
@@ -246,6 +238,8 @@ namespace FRESHMusicPlayer
         public bool IsSystemPlaylist { get; set; }
 
         public List<int> Tracks { get; set; }
+
+        public byte[] CoverArt { get; set; }
     }
 }
 #pragma warning restore CS1591

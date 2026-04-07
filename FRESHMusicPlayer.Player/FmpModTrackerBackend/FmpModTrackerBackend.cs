@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace FmpBassBackend
+namespace FmpModTrackerBackend
 {
     [Export(typeof(IAudioBackend))]
     public class FmpBassBackend : IAudioBackend
@@ -21,7 +21,7 @@ namespace FmpBassBackend
 
         public event EventHandler<EventArgs> OnPlaybackStopped;
 
-        private readonly MediaPlayer player = new MediaPlayer();
+        private readonly MediaPlayerEx player = new MediaPlayerEx();
 
         public FmpBassBackend()
         {
@@ -35,7 +35,11 @@ namespace FmpBassBackend
 
         private void Player_MediaEnded(object sender, EventArgs e) => OnPlaybackStopped?.Invoke(null, EventArgs.Empty);
 
-        public void Dispose() => player?.Dispose();
+        public void Dispose()
+        {
+            player?.Stop();
+            player?.Dispose();
+        }
 
         public async Task<BackendLoadResult> LoadSongAsync(string file)
         {
@@ -58,7 +62,7 @@ namespace FmpBassBackend
             else return $"{name}.dll";
         }
 
-        public async Task<(BackendLoadResult, IMetadataProvider)> CheckAndGetMetadataAsync(string file)
+        public Task<(BackendLoadResult, IMetadataProvider)> CheckAndGetMetadataAsync(string file)
         {
             if (File.Exists(file))
             {

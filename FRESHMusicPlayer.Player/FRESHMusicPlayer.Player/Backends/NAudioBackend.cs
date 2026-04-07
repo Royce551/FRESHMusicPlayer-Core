@@ -88,6 +88,15 @@ namespace FRESHMusicPlayer.Backends
 
         public async Task<IMetadataProvider> GetMetadataAsync(string file) => await Task.Run(() => new FileMetadataProvider(file));
 
+        public async Task<(BackendLoadResult, IMetadataProvider)> CheckAndGetMetadataAsync(string file)
+        {
+            if (File.Exists(file))
+            {
+                return (BackendLoadResult.OK, await Task.Run(() => new FileMetadataProvider(file)));
+            }
+            else return (BackendLoadResult.NotSupported, null);
+        }
+
         public void Play()
         {
             OutputDevice.Play();

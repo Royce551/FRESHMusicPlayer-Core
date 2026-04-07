@@ -93,6 +93,40 @@ namespace FRESHMusicPlayer.Backends
             }
             return (null, new PlaybackExceptionEventArgs(exceptions, problems));
         }
+
+        /// <summary>
+        /// Queries the audio backend system for the most appropiate backend and gets the metadata for it, bypassing audio device initialization
+        /// </summary>
+        /// <param name="filename">The file path to play</param>
+        /// <returns>The appropiate backend</returns>
+        /// <exception cref="Exception">Thrown if no backend could be found</exception>
+        public static async Task<(IMetadataProvider metadata, PlaybackExceptionEventArgs problems)> CreateAndLoadBackendAndGetMetadataAsync(string filename)
+        {
+            var exceptions = new Dictionary<string, Exception>();
+            var problems = new Dictionary<string, BackendLoadResult>();
+
+            foreach (var lazybackend in container.GetExports<Lazy<IAudioBackend>>())
+            {
+                IAudioBackend backend = lazybackend.Value;
+                try
+                {
+                    var result = await backend.CheckAndGetMetadataAsync(filename);
+                    if (result.Item1 != BackendLoadResult.OK)
+                    {
+                        problems.Add(backend.ToString(), result.Item1);
+                        backend.Dispose();
+                    }
+                    else return (result.Item2, null);
+                }
+                catch (Exception e)
+                {
+                    problems.Add(lazybackend.ToString(), BackendLoadResult.UnknownError);
+                    exceptions.Add(lazybackend.ToString(), e);
+                    backend.Dispose();
+                }
+            }
+            return (null, new PlaybackExceptionEventArgs(exceptions, problems));
+        }
     }
 }
 

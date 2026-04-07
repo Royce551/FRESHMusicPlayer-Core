@@ -23,6 +23,13 @@ namespace FRESHMusicPlayer.Backends
         /// <param name="file">File path of the track to query metadata for</param>
         /// <returns>The metadata</returns>
         Task<IMetadataProvider> GetMetadataAsync(string file);
+
+        /// <summary>
+        /// Checks if this backend can get metadata for this path and, if so, gets the metadata, bypassing loading and initializing audio devices.
+        /// </summary>
+        /// <param name="file">File path of the track to query metadata for</param>
+        /// <returns>The metadata and whether it succeeded</returns>
+        Task<(BackendLoadResult, IMetadataProvider)> CheckAndGetMetadataAsync(string file);
         /// <summary>
         /// Begins playback. If paused, begins playback again
         /// </summary>
