@@ -3,6 +3,7 @@ using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Composition;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -45,17 +46,30 @@ namespace FRESHMusicPlayer.Backends
         {
             
         }
-
-        public async Task<BackendLoadResult> LoadSongAsync(string file)
+        
+        private void InitializeOutputDevice()
         {
             if (OutputDevice is null)
             {
                 OutputDevice = new WaveOutEvent();
-                OutputDevice.PlaybackStopped += (object o, StoppedEventArgs e) =>
+                OutputDevice.PlaybackStopped += async (object o, StoppedEventArgs e) =>
                 {
-                    OnPlaybackStopped.Invoke(null, EventArgs.Empty);
+                    if (e.Exception != null)
+                    {
+                        OutputDevice.Dispose();
+                        OutputDevice = null;
+
+                        InitializeOutputDevice();
+                        OutputDevice.Init(equalizer);
+                    }
+                    else OnPlaybackStopped.Invoke(null, EventArgs.Empty);
                 };
             }
+        }
+
+        public async Task<BackendLoadResult> LoadSongAsync(string file)
+        {
+            InitializeOutputDevice();
 
             if (AudioFile != null) AudioFile.Dispose();
             try
