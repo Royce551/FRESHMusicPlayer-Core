@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.7.34009.444
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11626.88 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FRESHMusicPlayer.Core", "FRESHMusicPlayer.Player\FRESHMusicPlayer.Core.csproj", "{FFE8EAFD-7FAA-4503-9364-2643821A2BC8}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FmpBassBackend", "FmpBassBackend\FmpBassBackend.csproj", "{73F98C4B-D1F8-431E-8906-4453B74A167D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FmpModTrackerBackend", "FmpModTrackerBackend\FmpModTrackerBackend.csproj", "{9A63D694-7CEE-4858-A8E7-0223B9359AD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FmpNAudioBackend", "FmpNAudioBackend\FmpNAudioBackend.csproj", "{6138D9CB-7B7C-4BEE-A172-AF3C977F1CB0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{9A63D694-7CEE-4858-A8E7-0223B9359AD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A63D694-7CEE-4858-A8E7-0223B9359AD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A63D694-7CEE-4858-A8E7-0223B9359AD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6138D9CB-7B7C-4BEE-A172-AF3C977F1CB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6138D9CB-7B7C-4BEE-A172-AF3C977F1CB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6138D9CB-7B7C-4BEE-A172-AF3C977F1CB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6138D9CB-7B7C-4BEE-A172-AF3C977F1CB0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

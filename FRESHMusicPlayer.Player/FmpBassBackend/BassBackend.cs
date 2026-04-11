@@ -1,7 +1,6 @@
 ﻿using FRESHMusicPlayer.Backends;
 using ManagedBass;
 using System;
-using System.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -10,8 +9,7 @@ using System.Threading.Tasks;
 
 namespace FmpBassBackend
 {
-    [Export(typeof(IAudioBackend))]
-    public class FmpBassBackend : IAudioBackend
+    public class BassBackend : IAudioBackend
     {
         public TimeSpan CurrentTime { get => player.Position; set => player.Position = value; }
 
@@ -23,7 +21,7 @@ namespace FmpBassBackend
 
         private readonly MediaPlayer player = new MediaPlayer();
 
-        public FmpBassBackend()
+        public BassBackend()
         {
             player.MediaEnded += Player_MediaEnded;
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // on windows media foundation already provides flac support,

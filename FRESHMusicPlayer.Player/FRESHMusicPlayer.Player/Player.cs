@@ -163,7 +163,7 @@ namespace FRESHMusicPlayer
 
             async Task PMusic()
             {
-                var (backend, problems) = await AudioBackendFactory.CreateAndLoadBackendAsync(FilePath);
+                var (backend, problems) = await BackendManager.CreateAndLoadBackendAsync(FilePath);
                 if (backend is null)
                 {
                     SongException?.Invoke(null, problems);

@@ -105,7 +105,7 @@ namespace FRESHMusicPlayer
                 Debug.WriteLine("Thread started");
                 try
                 {
-                    IMetadataProvider metadata = (await AudioBackendFactory.CreateAndLoadBackendAndGetMetadataAsync(track.Path)).metadata;
+                    IMetadataProvider metadata = (await BackendManager.CreateAndLoadBackendAndGetMetadataAsync(track.Path)).metadata;
 
                     if (metadata is null) metadata = new FileMetadataProvider(track.Path);
                   
@@ -150,7 +150,7 @@ namespace FRESHMusicPlayer
             {
                 try
                 {
-                    var track = await AudioBackendFactory.CreateAndLoadBackendAndGetMetadataAsync(path);
+                    var track = await BackendManager.CreateAndLoadBackendAndGetMetadataAsync(path);
 
                     if (track.metadata != null) return new DatabaseTrack(path, track.metadata, true);
                 }

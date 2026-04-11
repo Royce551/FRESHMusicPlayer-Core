@@ -2,7 +2,6 @@
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
-using System.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,8 +10,7 @@ using System.Threading.Tasks;
 
 namespace FRESHMusicPlayer.Backends
 {
-    [Export(typeof(IAudioBackend))]
-    class NAudioBackend : IAudioBackend, ISupportEqualization
+    public class NAudioBackend : IAudioBackend, ISupportEqualization
     {
         public WaveOutEvent OutputDevice;
 
@@ -20,12 +18,12 @@ namespace FRESHMusicPlayer.Backends
 
         public AudioFileReader AudioFile { get; set; }
 
-        public float Volume 
-        { 
-            get => AudioFile.Volume; 
-            set => AudioFile.Volume = value; 
+        public float Volume
+        {
+            get => AudioFile.Volume;
+            set => AudioFile.Volume = value;
         }
-        public TimeSpan CurrentTime 
+        public TimeSpan CurrentTime
         {
             get => AudioFile.CurrentTime;
             set => AudioFile.CurrentTime = value;
@@ -44,9 +42,9 @@ namespace FRESHMusicPlayer.Backends
 
         public NAudioBackend()
         {
-            
+
         }
-        
+
         private void InitializeOutputDevice()
         {
             if (OutputDevice is null)

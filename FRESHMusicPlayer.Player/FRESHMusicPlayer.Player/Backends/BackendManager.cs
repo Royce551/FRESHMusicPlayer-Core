@@ -13,7 +13,7 @@ namespace FRESHMusicPlayer.Backends
     /// A lower level class for directly getting audio backends.
     /// You should probably use the Player class unless there's a reason you need more control.
     /// </summary>
-    public static class AudioBackendFactory
+    public static class BackendManager
     {
         private readonly static ContainerConfiguration config = new ContainerConfiguration();
         private readonly static CompositionHost container;
@@ -41,6 +41,21 @@ namespace FRESHMusicPlayer.Backends
             }
         }
 
+        private static readonly List<IAudioBackend> loadedBackends = new List<IAudioBackend>();
+        /// <summary>
+        /// All backends currently available to FMP.
+        /// </summary>
+        public static IEnumerable<IAudioBackend> LoadedBackends => loadedBackends.Concat(container.GetExports<Lazy<IAudioBackend>>().Select(x => x.Value));
+
+        /// <summary>
+        /// Loads a backend to FMP.
+        /// </summary>
+        /// <param name="backend">The backend to load</param>
+        public static void LoadBackend(IAudioBackend backend)
+        {
+            loadedBackends.Add(backend);
+        }
+
         /// <summary>
         /// Adds a directory where FMP will search for audio backends
         /// </summary>
@@ -52,11 +67,17 @@ namespace FRESHMusicPlayer.Backends
             config.WithAssemblies(LoadAssemblies(Directory.GetFiles(path, "*.dll")));
         }
 
-        static AudioBackendFactory()
+        /// <summary>
+        /// Adds default backend search directories from previous versions of FMP Core.
+        /// </summary>
+        public static void AddDefaultSearchDirectories()
         {
             AddDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backends"));
             AddDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "FRESHMusicPlayer", "Backends"));
-            config.WithAssembly(typeof(AudioBackendFactory).Assembly);
+        }
+
+        static BackendManager()
+        { 
             container = config.CreateContainer();
         }
 
@@ -71,9 +92,8 @@ namespace FRESHMusicPlayer.Backends
             var exceptions = new Dictionary<string, Exception>();
             var problems = new Dictionary<string, BackendLoadResult>();
 
-            foreach (var lazybackend in container.GetExports<Lazy<IAudioBackend>>())
+            foreach (var backend in LoadedBackends)
             {
-                IAudioBackend backend = lazybackend.Value;
                 try
                 {
                     var result = await backend.LoadSongAsync(filename);
@@ -86,8 +106,8 @@ namespace FRESHMusicPlayer.Backends
                 }
                 catch (Exception e)
                 {
-                    problems.Add(lazybackend.ToString(), BackendLoadResult.UnknownError);
-                    exceptions.Add(lazybackend.ToString(), e);
+                    problems.Add(backend.ToString(), BackendLoadResult.UnknownError);
+                    exceptions.Add(backend.ToString(), e);
                     backend.Dispose();
                 }
             }
@@ -105,9 +125,8 @@ namespace FRESHMusicPlayer.Backends
             var exceptions = new Dictionary<string, Exception>();
             var problems = new Dictionary<string, BackendLoadResult>();
 
-            foreach (var lazybackend in container.GetExports<Lazy<IAudioBackend>>())
+            foreach (var backend in LoadedBackends)
             {
-                IAudioBackend backend = lazybackend.Value;
                 try
                 {
                     var result = await backend.CheckAndGetMetadataAsync(filename);
@@ -120,8 +139,8 @@ namespace FRESHMusicPlayer.Backends
                 }
                 catch (Exception e)
                 {
-                    problems.Add(lazybackend.ToString(), BackendLoadResult.UnknownError);
-                    exceptions.Add(lazybackend.ToString(), e);
+                    problems.Add(backend.ToString(), BackendLoadResult.UnknownError);
+                    exceptions.Add(backend.ToString(), e);
                     backend.Dispose();
                 }
             }
